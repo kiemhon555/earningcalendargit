@@ -1,0 +1,582 @@
+{
+	"website": "https://www.avanza.se/placera/foretagskalendern.html",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name" : "Click All",
+			"clicks": "dynamic",
+			"selectorType" : "cssSelector",
+			"selector" : "a.viewMoreLink",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-0",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::dd/preceding::dt[1]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "#siteContent > div.row > div.column.grid_11 > div.cq-column-2.ssi > div > div > dl > dd:nth-child(n) > div > p:nth-child(n)>a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Period",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::p",
+					"splitter" : " - ",
+					"position" : 1
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "preceding::h2[@class='companyCalendarTitle'][1]",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}
+
+{
+	"website": "https://finance.yahoo.com/calendar/earnings",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name" : "Next Week",
+			"clicks": "52",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"fin-cal-events\"]/div[2]/a[2]",
+			"clickOnLoad" : "false",
+			"index" : 0,
+			"incrementation" : 1
+		},
+		{
+			"name" : "Next day",
+			"clicks": "8",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"fin-cal-events\"]/div[2]/ul/li[(euroland)]/a",
+			"clickOnLoad" : "true",
+			"index" : 1,
+			"incrementation" : 1
+		},
+		{
+			"name" : "Next Page",
+			"clicks": "dynamic",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"fin-cal-table\"]/div[2]/div[2]/button[3]",
+			"clickOnLoad" : "false",
+			"index" : 0,
+			"incrementation" : 0
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-0",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selector" : "ancestor::div[@id=\"fin-cal-table\"]/ancestor::div/preceding::div/div[@id=\"fin-cal-events\"]/div[2]/ul/li[@class='D(ib) Va(t) Bdrs(2px) Bdtw(0px) Bdbw(0px) Bdendw(0px) Bds(s) Px(10px) Pb(10px) W(12%) W(12.4%)--lgv2 W(21.5%)--tab768 Bd!--tab768 Bxsh($boxAreaShadow)--tab768 Bdstartw(1px) Bdc($c-fuji-blue-1-b) Bgc($lightBlue) Bdw(1px)! Mt(-1px) Mb(-1px) sel-cal-itm  Pt(8px) Mih(85px) ']/a",
+					"selectorType" : "xpath",
+					"splitter" : "day=",
+					"position" : 1
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "//*[@id=\"fin-cal-table\"]/div[2]/div/table/tbody/tr[*]/td[3]",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Symbol",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Earning Call Time",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[4]",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}
+
+{
+	"website": "https://se.investing.com/earnings-calendar/",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name" : "Pop Up",
+			"clicks": "1",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"PromoteSignUpPopUp\"]/div[2]/i",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		}, {
+			"name" : "This Week and Next Week",
+			"clicks": "6",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"earningsCalendarFilters\"]/div[1]/a[(euroland)]",
+			"clickOnLoad" : "true",
+			"index" : 4,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-5",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/preceding::tr[@tablesorterdivider][1]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "//*[@id=\"earningsCalendarData\"]/tbody/tr[*]/td[2]/span",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Symbol",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}
+
+{
+	"website": "https://www.tradingview.com/markets/stocks-sweden/earnings/",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name" : "This Week and Next Week",
+			"clicks": "6",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"js-screener-container\"]/div[2]/div[6]/div/div/div[(euroland)]",
+			"clickOnLoad" : "true",
+			"index" : 4,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-0",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[9]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "//*[@id=\"js-screener-container\"]/div[4]/table/tbody/tr[*]/td[1]/div/div[2]/span",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Symbol",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::div/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::div/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}
+
+{
+	"website": "https://www.oslobors.no/ob_eng/markedsaktivitet/#/calendar/",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name": "Open Calendar",
+			"clicks": "1",
+			"selectorType": "xpath",
+			"selector": "//label[contains(text(),'To date')]/span/button",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		},
+		{
+			"name": "Click All",
+			"clicks": "15",
+			"selectorType": "xpath",
+			"selector": "//button[@class='ws-next']",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		},
+		{
+			"name": "Search",
+			"clicks": "1",
+			"selectorType": "xpath",
+			"selector": "//button[@data-id='day-15']",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[1]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div:nth-child(4) > ui-view > div > div:nth-child(4) > div > div > quotes > table > tbody > tr:nth-child(n) > td.ISSUER_NAME",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[3]",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[3]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}
+
+{
+	"website": "https://www.is.fi/taloussanomat/osinkokalenteri/tulosjulkistukset/",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe" : "",
+	"pagination": [
+		{
+			"name": "Pop Up",
+			"clicks": "1",
+			"selectorType": "xpath",
+			"selector": "//*[@id=\"sccm-opt-out-c1\"]",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		},
+		{
+			"name": "Click Year",
+			"clicks": "4",
+			"selectorType": "xpath",
+			"selector": "//*[@id=\"year-selector\"]/option[(euroland)]",
+			"clickOnLoad" : "true",
+			"index" : 2,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[2]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div.wrapper.site-wrapper > main > div:nth-child(3) > div > div > div > section > table > tbody > tr:nth-child(n) > td.company.text > a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::td/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::table/thead/tr/th[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}, {
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[3]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div.wrapper.site-wrapper > main > div:nth-child(3) > div > div > div > section > table > tbody > tr:nth-child(n) > td.company.text > a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::td/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::table/thead/tr/th[3]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}, {
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[4]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div.wrapper.site-wrapper > main > div:nth-child(3) > div > div > div > section > table > tbody > tr:nth-child(n) > td.company.text > a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::td/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::table/thead/tr/th[4]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}, {
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[5]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div.wrapper.site-wrapper > main > div:nth-child(3) > div > div > div > section > table > tbody > tr:nth-child(n) > td.company.text > a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::td/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::table/thead/tr/th[5]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}, {
+			"dateDetails" : {
+				"datePattern" : "pattern-2",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/td[6]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "body > div.wrapper.site-wrapper > main > div:nth-child(3) > div > div > div > section > table > tbody > tr:nth-child(n) > td.company.text > a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::td/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::table/thead/tr/th[6]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}

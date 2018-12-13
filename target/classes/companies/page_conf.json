@@ -1,0 +1,68 @@
+{
+	"website": "https://se.investing.com/earnings-calendar/",
+	"standardDate" : "MM-dd-yyyy",
+	"iframe": "",
+	"pagination": [
+		{
+			"name" : "Pop Up",
+			"clicks": "1",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"PromoteSignUpPopUp\"]/div[2]/i",
+			"clickOnLoad" : "true",
+			"index" : 0,
+			"incrementation" : 1
+		}, {
+			"name" : "This Week and Next Week",
+			"clicks": "6",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"earningsCalendarFilters\"]/div[1]/a[(euroland)]",
+			"clickOnLoad" : "true",
+			"index" : 4,
+			"incrementation" : 1
+		}
+	],
+	"crawlingSections" : [
+		{
+			"dateDetails" : {
+				"datePattern" : "pattern-5",
+				"fullDate" : { 
+					"name" : "Date",
+					"type" : "txtOut",
+					"ref" : "",
+					"selector" : "ancestor::tr/preceding::tr[@tablesorterdivider][1]",
+					"selectorType" : "xpath",
+					"splitter" : "",
+					"position" : 0
+				},
+				"splitDate" : []
+			},
+			"basicDetails" : [
+				{
+					"name": "Company Name",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "//*[@id=\"earningsCalendarData\"]/tbody/tr[*]/td[2]/span",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Symbol",
+					"type" : "txtOut",
+					"ref" : "",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}, {
+					"name": "Url",
+					"type" : "attributeOut",
+					"ref" : "href",
+					"selectorType": "xpath",
+					"selector": "ancestor::tr/td[2]/a",
+					"splitter" : "",
+					"position" : 0
+				}
+			]
+		}
+	]
+}

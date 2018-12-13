@@ -40,7 +40,7 @@ public class SeleniumHandler {
 
 		try {
 			wbl.click();
-			Thread.sleep(2000);
+			Thread.sleep(3000);
 		} catch (Exception e) {
 			return false;
 		}

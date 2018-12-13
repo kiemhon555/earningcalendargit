@@ -97,7 +97,7 @@ public class SeleniumService {
 		return ret;
 	}
 
-	public List<WebElement> weblementsOut(WebElement driver, String element, String elmType) {
+	public List<WebElement> webElementsOut(WebElement driver, String element, String elmType) {
 		List<WebElement> ret = new ArrayList<WebElement>();
 		try {
 			if (elmType.equals("cssSelector")) {
@@ -166,7 +166,7 @@ public class SeleniumService {
 		return ret;
 	}
 
-	public List<WebElement> weblementsOut(WebDriver driver, String element, String elmType) {
+	public List<WebElement> webElementsOut(WebDriver driver, String element, String elmType) {
 		List<WebElement> ret = new ArrayList<WebElement>();
 		driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
 		element = element.trim();

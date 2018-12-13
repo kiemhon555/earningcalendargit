@@ -7,7 +7,6 @@ import java.io.Reader;
 
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.model.Conf;
 import com.google.gson.Gson;
 
 @Service
@@ -17,15 +16,21 @@ public class ConfService {
 	 * prepare Conf object from given json file
 	 * 
 	 * @param file
+	 * @return 
 	 * @return Conf class
 	 * @throws IOException
 	 */
-	public Conf prepareTestConf(String file) throws IOException {
-		System.out.append(file);
-		Gson gson = new Gson();
-		String json = getStrFromFile(file);
-		Conf conf = gson.fromJson(json, Conf.class);
-		return conf;
+	public Object prepareTestConf(String file, Object obj) {
+//		System.out.append(file);
+		String json = null;
+		try {
+			json = getStrFromFile(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		obj = new Gson().fromJson(json, obj.getClass());
+		return obj;
 	}
 
 	/**

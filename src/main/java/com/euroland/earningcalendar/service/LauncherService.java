@@ -30,12 +30,7 @@ public abstract class LauncherService {
 	public void appRunner(String config, String url) {
 		
 		Conf conf = null;
-		try {
-			conf = confService.prepareTestConf(config);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		conf = (Conf) confService.prepareTestConf(config, new Conf());
 		WebDriver driver = null;
 		try {
 			driver = seleniumService.getDriver("");
@@ -57,7 +52,7 @@ public abstract class LauncherService {
 		// loop sections from json configurtaion file
 		for (CrawlSection cf : conf.getCrawlingSection()) {
 
-			List<WebElement> crwls = seleniumService.weblementsOut(driver, cf.getSelector(), cf.getSelectorType());
+			List<WebElement> crwls = seleniumService.webElementsOut(driver, cf.getSelector(), cf.getSelectorType());
 
 			// loop Announcements from table
 			for (WebElement w : crwls) {

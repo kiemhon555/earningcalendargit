@@ -1,0 +1,29 @@
+{
+	"dateFormat": "dd MM yyyy",
+	"crawlingSection": [
+		{
+			"selectorType": "cssSelector",
+			"selector": "#mainTable>tbody>tr",
+			"crawlingElements": [
+				{
+					"type": "txtOut",
+					"name": "original event name",
+					"selectorType": "cssSelector",
+					"selector": "td:nth-child(2)"
+				},
+				{
+					"type": "txtOut",
+					"name": "original company name",
+					"selectorType": "cssSelector",
+					"selector": "td:nth-child(1)"
+				},
+				{
+					"type": "txtOut",
+					"name": "consensus nr",
+					"selectorType": "cssSelector",
+					"selector": "td:nth-child(3)"
+				}
+			]
+		}
+	]
+}

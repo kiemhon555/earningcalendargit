@@ -48,10 +48,10 @@ public class CnbcLaucherService extends LauncherService {
 				e.printStackTrace();
 			}
 
-			List<WebElement> days = seleniumService.weblementsOut(driver, "#dayContainer>div>div>div>a", "cssSelector");
+			List<WebElement> days = seleniumService.webElementsOut(driver, "#dayContainer>div>div>div>a", "cssSelector");
 
 			// count how many next clicks exist
-			List<WebElement> nextEvents = seleniumService.weblementsOut(driver, "#pagination>a", "cssSelector");
+			List<WebElement> nextEvents = seleniumService.webElementsOut(driver, "#pagination>a", "cssSelector");
 			int nextEventUrlsClicks = nextEvents.size() + 1;
 
 			// loop days per week

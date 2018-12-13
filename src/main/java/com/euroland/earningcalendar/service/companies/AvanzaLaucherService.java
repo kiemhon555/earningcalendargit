@@ -35,13 +35,13 @@ public class AvanzaLaucherService extends LauncherService {
 	protected void crawl(Conf conf, WebDriver driver) {
 		for (CrawlSection cf : conf.getCrawlingSection()) {
 
-			List<WebElement> allinks = seleniumService.weblementsOut(driver, cf.getSelector(), cf.getSelectorType());
+			List<WebElement> allinks = seleniumService.webElementsOut(driver, cf.getSelector(), cf.getSelectorType());
 			String event = "";
 			for (WebElement w : allinks) {
 				String companyName = "";
 				String type = "";
 				if (w.getTagName().equals("dd")) {
-					List<WebElement> allcompanies = seleniumService.weblementsOut(w, "dd>.companyCalendarCountryItem>*", "cssSelector");
+					List<WebElement> allcompanies = seleniumService.webElementsOut(w, "dd>.companyCalendarCountryItem>*", "cssSelector");
 					for (WebElement wc : allcompanies) {
 						try {
 							type = wc.getText().split(" - ")[1].trim();

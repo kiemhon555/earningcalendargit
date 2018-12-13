@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Built-By: Michael
+Build-Jdk: 11.0.1
+Implementation-Title: EarningCalendar
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: com.euroland
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-boot
+ -starter-parent/EarningCalendar
+Created-By: Maven Integration for Eclipse
+

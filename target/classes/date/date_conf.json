@@ -1,0 +1,60 @@
+{
+	"monthTranslations" : {
+		"01": ["01", "1", "jan", "january", "enero"],
+		"02": ["02", "2", "feb", "february"],
+		"03": ["03", "3", "mar", "march"],
+		"04": ["04", "4", "apr", "april"],
+		"05": ["05", "5", "may", "may"],
+		"06": ["06", "6", "jun", "june"],
+		"07": ["07", "7", "jul", "july"],
+		"08": ["08", "8", "aug", "august"],
+		"09": ["09", "9", "sep", "september"],
+		"10": ["10", "oct", "october"],
+		"11": ["11", "nov", "november"],
+		"12": ["12", "dec", "december"]
+	},
+	"dateRegexPatterns" : {
+		"pattern-0": {
+			"pattern" : "2018 12 25",
+			"regex": "\\d{2,4}\\s(1[0-2]|0[1-9]|[1-9])\\s([0-2][0-9]|3[0-1]|[1-9])",
+			"year": 0,
+		    "month": 1,
+		    "day": 2
+		},
+		"pattern-1": {
+			"pattern" : "12 25 2018",
+			"regex": "(1[0-2]|0[1-9]|[1-9])\\s([0-2][0-9]|3[0-1]|[1-9])\\s\\d{2,4}",
+			"year": 2,
+		    "month": 0,
+		    "day": 1
+		},
+		"pattern-2": {
+			"pattern" : "25 12 2018",
+			"regex": "([0-2][0-9]|3[0-1]|[1-9])\\s(1[0-2]|0[1-9]|[1-9])\\s\\d{2,4}",
+			"year": 2,
+		    "month": 1,
+		    "day": 0
+		},
+		"pattern-3": {
+			"pattern" : "2018 december 25",
+			"regex": "\\d{2,4}\\s(\\b[^\\d\\W]+\\b)\\s([0-2][0-9]|3[0-1]|[1-9])",
+			"year": 0,
+		    "month": 1,
+		    "day": 2
+		},
+		"pattern-4": {
+			"pattern" : "december 25 2018",
+			"regex": "\\b[^\\d\\W]+\\b\\s([0-2][0-9]|3[0-1]|[1-9])\\s\\d{2,4}",
+			"year": 2,
+		    "month": 0,
+		    "day": 1
+		},
+		"pattern-5": {
+			"pattern" : "25 december 2018",
+			"regex": "([0-2][0-9]|3[0-1]|[1-9])\\s(\\b[^\\d\\W]+\\b)\\s\\d{2,4}",
+			"year": 2,
+		    "month": 1,
+		    "day": 0
+		}
+	}
+}

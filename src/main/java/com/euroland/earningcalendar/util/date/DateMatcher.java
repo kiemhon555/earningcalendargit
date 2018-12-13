@@ -1,9 +1,5 @@
 package com.euroland.earningcalendar.util.date;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -13,61 +9,79 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.euroland.earningcalendar.model.DateConfig;
 import com.euroland.earningcalendar.model.DatePattern;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.euroland.earningcalendar.util.configuration.ConfService;
 
 @Service
 public class DateMatcher {
 	
-	final String REGEX_CONFIG_FILE = ".\\src\\main\\resources\\date\\regex_conf.json";
-	final String MONTH_CONFIG_FILE = ".\\src\\main\\resources\\date\\month_conf.json";
+	@Autowired
+	ConfService confService;
+	
+	final String DATE_CONFIG_FILE = ".\\src\\main\\resources\\date\\date_conf.json";
+	
+	
+	final String DEFAULT_DATE_FORMAT_1 = "yyyy-MM-dd";
+	final String DEFAULT_DATE_FORMAT_2 = "yy-MM-dd";
+	final String DEFAULT_PATTERN = "pattern-0"; // yyyy=MM-dd
 	
 	final String REGEX_DELIMITER = "[,-/ ]+";
 	final String DELIMITER = " ";
 	
-	Map<String, List<String>> moList = new HashMap<>();
-	Map<String, DatePattern> patternList = new HashMap<>();
+	private Map<String, List<String>> moList = new HashMap<>();
+	private Map<String, DatePattern> patternList = new HashMap<>();
 	
 	// Return Empty String if failed to Match
-	public String getDate(String date, String format) {
+	public String getDate(String date, String pattern, String format) {
 		
 		String modifiedDate = "";
 		
-		try {
-			loadRegex();
-			loadMonth();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		loadDateConfig();
 		
 		String dateChanged = "No Match";
+		DateTimeFormatter formatter = null;
+		
 		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER);
 		if (!d.contains(DELIMITER)) {
 			return modifiedDate;
 		}
-		System.out.println(date);
 		
-		for(Map.Entry<String, DatePattern> l : patternList.entrySet()) {
-			
-			DatePattern dp = l.getValue();
-			Matcher m = Pattern.compile(dp.getRegex()).matcher(d);
-			if(m.find()) { // if match found
-				String[] s = m.group().split(DELIMITER);
-				dateChanged = s[dp.getYear()] + "-" + modify(s[dp.getMonth()]) + "-" + modify(s[dp.getDay()]);
-				break;
+		if(pattern.equals(""))
+			pattern = DEFAULT_PATTERN;
+		
+		DatePattern dp = patternList.get(pattern);
+		String f = DEFAULT_DATE_FORMAT_1;
+	
+		Matcher m = Pattern.compile(dp.getRegex()).matcher(d);
+		if(m.find()) { // if match found
+			String[] s = m.group().split(DELIMITER);
+			if(Integer.parseInt(s[dp.getYear()]) < 100) {
+				f = DEFAULT_DATE_FORMAT_2;
 			}
+			dateChanged = s[dp.getYear()] + "-" + modify(s[dp.getMonth()]) + "-" + modify(s[dp.getDay()]);
+	
 		}
 		
 		if (!dateChanged.equals("No Match")) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
+			formatter = DateTimeFormatter.ofPattern(f, Locale.ENGLISH);
 			modifiedDate = LocalDate.parse(dateChanged, formatter).format(DateTimeFormatter.ofPattern(format));
 		}
 		
+//		System.out.println(modifiedDate);
+		
 		return modifiedDate;
+	}
+
+	
+	private void loadDateConfig() {
+		DateConfig dc = (DateConfig) confService.prepareTestConf(DATE_CONFIG_FILE, new DateConfig());
+		patternList = dc.getDateRegexPatterns();
+		moList = dc.getMonthTranslations();
 	}
 	
 	private String modify(String mod) {
@@ -101,38 +115,5 @@ public class DateMatcher {
 	    return 0;  // not integer
 	  }  
 	  return i;  
-	}
-	
-	private void loadRegex() throws IOException {
-		
-		System.out.append(REGEX_CONFIG_FILE);
-		Gson gson = new Gson();
-		String json = getStrFromFile(REGEX_CONFIG_FILE);
-		
-		patternList = gson.fromJson(json, new TypeToken<Map<String, DatePattern>>() {}.getType());
-	}
-
-	private void loadMonth() throws IOException {
-		
-		System.out.append(MONTH_CONFIG_FILE);
-		Gson gson = new Gson();
-		String json = getStrFromFile(MONTH_CONFIG_FILE);
-		
-		moList = gson.fromJson(json, new TypeToken<Map<String, List<String>>>() {}.getType());
-
-	}
-	
-	private String getStrFromFile(String pathname) throws IOException {
-		FileInputStream fis = new FileInputStream(pathname);
-		StringBuilder sb = new StringBuilder();
-		Reader r = new InputStreamReader(fis, "UTF-8");
-		char[] buf = new char[1024];
-		int amt = r.read(buf);
-		while (amt > 0) {
-			sb.append(buf, 0, amt);
-			amt = r.read(buf);
-		}
-		fis.close();
-		return sb.toString();
 	}
 }
