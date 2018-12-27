@@ -99,6 +99,7 @@ public class SeleniumService {
 
 	public List<WebElement> webElementsOut(WebElement driver, String element, String elmType) {
 		List<WebElement> ret = new ArrayList<WebElement>();
+		element = element.trim();
 		try {
 			if (elmType.equals("cssSelector")) {
 				element.replace(" ", ".");
@@ -127,13 +128,20 @@ public class SeleniumService {
 
 	public String attributeOut(WebElement driver, String element, String elmType, String attribute) {
 		String ret = "";
-		ret = webElementOut(driver, element, elmType).getAttribute(attribute).toString();
+		WebElement we = webElementOut(driver, element, elmType);
+		
+		if(we != null)
+				ret = we.getAttribute(attribute).toString();
+		
 		return ret;
 	}
 
 	public String textOut(WebDriver driver, String element, String elmType) {
 		String ret = "";
-		ret = webElementOut(driver, element, elmType).getText().toString();
+		WebElement we = webElementOut(driver, element, elmType);
+		if(we != null)
+				ret = we.getText().toString();
+			
 		return ret;
 	}
 

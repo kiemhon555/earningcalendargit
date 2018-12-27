@@ -1,8 +1,7 @@
 package com.euroland.earningcalendar.util.data;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -10,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.CrawlingSection;
-import com.euroland.earningcalendar.model.DateDetails;
 import com.euroland.earningcalendar.model.ElementData;
+import com.euroland.earningcalendar.model.HeaderValue;
 import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.model.date.DateDetails;
 import com.euroland.earningcalendar.selenium.SeleniumService;
-import com.euroland.earningcalendar.util.date.DateMatcher;
+import com.euroland.earningcalendar.util.matcher.DateMatcherService;
+import com.euroland.earningcalendar.util.matcher.EventMatcherService;
 
 @Service
 public class DataCrawlerService {
@@ -22,70 +23,151 @@ public class DataCrawlerService {
 	@Autowired
 	SeleniumService seleniumService;
 	
-	@Autowired
-	DateMatcher dateMatcher;
-	
 	private static final String ATTRIBUTE_OUT = "attributeOut";
+	private static final String ORIGINAL_DATE = "Original Date";
+	private static final String ORIGINAL_EVENT = "Original Event";
+	private static final String EVENT = "event";
+	
+	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
 	
 	public void dataLoader(WebDriver driver, PageConfig config) {
 		
-		config.getCrawlingSections().forEach( c -> {
+		config.getCrawlingSections().stream().forEach( c -> {
 			
 			loadData(driver, c, config.getStandardDate());
-			
 		});
 		
-//		loadData(driver, config);
-		
-//		dateMatcher.getDate(" asfasf Jan 2, 2018 adsfasf", "pattern-1", "MM/dd/yyyy");// 1 c
-//		dateMatcher.getDate("ads12 january 2018", "pattern-2", "MM/dd/yyyy"); //2 c
-//		dateMatcher.getDate("2018 july 2", "pattern-3", "MM/dd/yyyy"); // 3 c
-//		dateMatcher.getDate("2018 enero 2", "pattern-3", "dd/MM/yyyy");
-//		dateMatcher.getDate("12-31-2019", "pattern-4", "MM/dd/yyyy");
-//		dateMatcher.getDate("jan/02 18", "pattern-1", "MM/dd/yyyy");// 1 c
-//		dateMatcher.getDate("2018/12/12", "pattern-0", "MM/dd/yyyy"); // 4
-//		dateMatcher.getDate("29-12-2018", "pattern-5", "MM/dd/yyyy");
-//		dateMatcher.getDate("31.10.19 asdasd", "pattern-5", "MM/dd/yyyy");
-//		dateMatcher.getDate("as29,2,19 asdasd", "pattern-5", "MM/dd/yyyy");
-		
 	}
-	
+
+	public List<List<HeaderValue>> getCrawledData() {
+		return headerValueList;
+	}
 	
 	private void loadData(WebDriver driver, CrawlingSection cs, String standardDate) {
 		
 		List<WebElement> wl = seleniumService.webElementsOut(
 				driver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
+
+//		for(WebElement w : wl) {
+//			
+//			List<HeaderValue> headerValue =  new ArrayList<>();
+//			
+//			if(cs.getDateDetails() != null) {
+//				// index 0 has the original date
+//				// index 1 has the modified date
+//				List<String> on = new ArrayList<>();
+//				on = getDateDetail(w, cs, standardDate);
+//				
+//				// Add Header Value for Original Date
+//				headerValue.add(new HeaderValue(
+//						ORIGINAL_DATE, 
+//						on.get(0)));
+//				System.out.println(ORIGINAL_DATE + " --- " + on.get(0));
+//				
+//				// Add Header Value of Modifed Date
+//				headerValue.add(new HeaderValue(
+//						cs.getDateDetails().getFullDate().getName(), 
+//						on.get(1)));
+//				System.out.println(cs.getDateDetails().getFullDate().getName() + " --- " + on.get(1));
+//
+//			}
+//			
+//			for(ElementData b : cs.getBasicDetails()) {
+//	
+//				String header = b.getName();
+//				String value = "";
+//				
+//				// Get values from the Website
+//				if(b == cs.getBasicDetails().get(0)) { // Company name must be always on first array
+//					if(b.getType().equals(ATTRIBUTE_OUT)) {
+//						value = w.getAttribute(b.getRef());
+//					} else {
+//						value = w.getText();
+//					}
+//					value = isSplit(value, b.getSplitter(), b.getPosition());
+//				} else {
+//					value = textOrAttribute(w, b);
+//				}
+//				
+//				// if there is a event
+//				if(header.toLowerCase().equals(EVENT)) {
+//					// Add Header Value for Original Event Name
+//					header = ORIGINAL_EVENT;
+//					headerValue.add(new HeaderValue(header, value));
+//					// Add Header Value for Modified Event Name
+//					header = b.getName();
+//					value = EventMatcherService.getEvent(value);
+//				}
+//				System.out.println(header + " --- " + value);
+//				// Add Header Value for Basic Details
+//				headerValue.add(new HeaderValue(header, value));
+//			}
+//			
+//			headerValueList.add(headerValue);
+//		}
 		
-		for(WebElement we : wl) {
+		wl.stream().forEach( w -> {
 			
-			System.out.println(
-				cs.getDateDetails().getFullDate().getName() + " - " + getDateDetail(we, cs, standardDate));
+			List<HeaderValue> headerValue =  new ArrayList<>();
 			
-			for(int ctr=0; ctr < cs.getBasicDetails().size(); ctr++) {
-	
-				String field = cs.getBasicDetails().get(ctr).getName();
-				String value = "";
+			if(cs.getDateDetails() != null) {
+				// index 0 has the original date
+				// index 1 has the modified date
+				List<String> on = new ArrayList<>();
+				on = getDateDetail(w, cs, standardDate);
 				
-				if(ctr == 0) {
-					if(cs.getBasicDetails().get(ctr).getType().equals(ATTRIBUTE_OUT)) {
-						value = we.getAttribute(cs.getBasicDetails().get(ctr).getRef());
-					} else {
-						value = we.getText();
-					}
-					value = isSplit(value, cs.getBasicDetails().get(ctr).getSplitter(), cs.getBasicDetails().get(ctr).getPosition());
-				} else {
-					value = textOrAttribute(we, cs.getBasicDetails().get(ctr));
-				}
+				// Add Header Value for Original Date
+				headerValue.add(new HeaderValue(
+						ORIGINAL_DATE, 
+						on.get(0)));
+				System.out.println(ORIGINAL_DATE + " --- " + on.get(0));
 				
-				System.out.println(field + " - " + value);
+				// Add Header Value of Modifed Date
+				headerValue.add(new HeaderValue(
+						cs.getDateDetails().getFullDate().getName(), 
+						on.get(1)));
+				System.out.println(cs.getDateDetails().getFullDate().getName() + " --- " + on.get(1));
+
 			}
 			
-			System.out.println("===============================");
-		}
-		
+			cs.getBasicDetails().stream().forEach( b -> {
+	
+				String header = b.getName();
+				String value = "";
+				
+				// Get values from the Website
+				if(b == cs.getBasicDetails().get(0)) { // Company name must be always on first array
+					if(b.getType().equals(ATTRIBUTE_OUT)) {
+						value = w.getAttribute(b.getRef());
+					} else {
+						value = w.getText();
+					}
+					value = isSplit(value, b.getSplitter(), b.getPosition());
+				} else {
+					value = textOrAttribute(w, b);
+				}
+				
+				// if there is a event
+				if(header.toLowerCase().equals(EVENT)) {
+					// Add Header Value for Original Event Name
+					header = ORIGINAL_EVENT;
+					headerValue.add(new HeaderValue(header, value));
+					System.out.println(header + " --- " + value);
+					
+					// Add Header Value for Modified Event Name
+					header = b.getName();
+					value = EventMatcherService.getEvent(value);
+				}
+				System.out.println(header + " --- " + value);
+				// Add Header Value for Basic Details
+				headerValue.add(new HeaderValue(header, value));
+			});
+			
+			headerValueList.add(headerValue);
+		});
 	}
 	
-	private String getDateDetail(WebElement we, CrawlingSection cs, String standardDate) {
+	private List<String> getDateDetail(WebElement we, CrawlingSection cs, String standardDate) {
 
 		String date = "";
 
@@ -93,6 +175,9 @@ public class DataCrawlerService {
 
 		DateDetails details = cs.getDateDetails();
 		
+		// index 0 has the original date
+		// index 1 has the modified date
+		List<String> on = new ArrayList<>();
 		
 		if(details.getSplitDate().size() ==0 ) {
 			date = textOrAttribute(we, details.getFullDate());
@@ -106,10 +191,17 @@ public class DataCrawlerService {
 			date = year + "-" + month + "-" + day;
 		}
 		
-		date = dateMatcher.getDate(
+		// adding original date
+		on.add(date);
+		
+		// modifying original date
+		date = DateMatcherService.getDate(
 				date, pattern, standardDate);
 		
-		return date;
+		// adding modified date
+		on.add(date);
+		
+		return on;
 	}
 	
 	private String textOrAttribute(WebElement we, ElementData ed) {
@@ -122,7 +214,7 @@ public class DataCrawlerService {
 			result = seleniumService.textOut(we, ed.getSelector(), ed.getSelectorType());
 		}
 		
-			result = isSplit(result, ed.getSplitter(), ed.getPosition());
+		result = isSplit(result, ed.getSplitter(), ed.getPosition());
 		
 		return result;
 	}

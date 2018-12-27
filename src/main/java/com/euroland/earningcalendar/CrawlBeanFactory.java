@@ -4,21 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.euroland.earningcalendar.model.Company;
-import com.euroland.earningcalendar.service.CommonLaucherService;
-import com.euroland.earningcalendar.service.companies.AvanzaLaucherService;
+import com.euroland.earningcalendar.model.Config;
+import com.euroland.earningcalendar.service.DefaultLauncherService;
 import com.euroland.earningcalendar.service.companies.CnbcLaucherService;
 
 @Component
 public class CrawlBeanFactory {
 	
 	@Autowired
-	@Qualifier("common")
-	private CommonLaucherService commonLaucherService;
-	
-	@Autowired
-	@Qualifier("avanza")
-	private AvanzaLaucherService avanzaLaucherService;
+	@Qualifier("default")
+	private DefaultLauncherService defaulLaucherService;
 	
 	@Autowired
 	@Qualifier("cnbc")
@@ -28,17 +23,15 @@ public class CrawlBeanFactory {
 		super();
 	}
 
-	public void getCrawl(Company company) {
-		switch (company.getCompanyName()) {
-		case "avanza":
-			avanzaLaucherService.appRunner(company.getConfigFile(), company.getCompanyUrl());
-			break;
-		case "cnbc":
-			cnbcLaucherService.appRunner(company.getConfigFile(), company.getCompanyUrl());
+	public void getCrawl(Config config) {
+		
+		switch (config.getCname()) {
+		case "test1":
+			cnbcLaucherService.appRunner(config);
 			break;
 
 		default:
-			commonLaucherService.appRunner(company.getConfigFile(), company.getCompanyUrl());
+			defaulLaucherService.appRunner(config);
 			break;
 		}
 	}

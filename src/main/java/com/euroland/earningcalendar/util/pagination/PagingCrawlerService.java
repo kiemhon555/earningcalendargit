@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.euroland.earningcalendar.model.PageConfig;
 import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
-import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 
 @Service
@@ -24,9 +23,7 @@ public class PagingCrawlerService {
 	
 	@Autowired
 	DataCrawlerService dataCrawlerService;
-	
-	@Autowired
-	ConfService confService;
+
 	
 	// Index Marker is used for determining where will be the iteration in the selector
 	private static final String INDEX_MARKER = "(euroland)";
@@ -40,10 +37,7 @@ public class PagingCrawlerService {
 	// To identify end date if have for the url loading
 	private static final String END_DATE_EURO = "(endDateEuro)";
 	
-	public void pageLoader(WebDriver driver, String file) throws InterruptedException {
-		
-		PageConfig config = (PageConfig) confService
-				.prepareTestConf(file, new PageConfig());
+	public void pageLoader(WebDriver driver, PageConfig config) {
 		
 		String page = config.getWebsite();
 		
@@ -55,8 +49,12 @@ public class PagingCrawlerService {
 			driver.get(page);
 		}
 		
-		Thread.sleep(10000);
-//		seleniumService.buttonClick(driver, "//*[@id=\"sccm-opt-out-c1\"]", "xpath");
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // 10 sec wait time for popup
 		
 		pageChecker(driver, config);
 	}
@@ -120,7 +118,7 @@ public class PagingCrawlerService {
 						// Get button element
 						WebElement we = seleniumService.webElementOut(
 								driver, st, config.getPagination().get(superCtr).getSelectorType());
-
+						
 						if(!checkNullOrDisable(we))
 							continue;
 						
@@ -241,6 +239,5 @@ public class PagingCrawlerService {
 	private void loadData(WebDriver driver, PageConfig config) {	
 		
 		dataCrawlerService.dataLoader(driver, config);
-
 	}
 }

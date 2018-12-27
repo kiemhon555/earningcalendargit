@@ -39,10 +39,22 @@ public class SeleniumHandler {
 		boolean ret = true;
 
 		try {
+			
 			wbl.click();
 			Thread.sleep(3000);
+			
 		} catch (Exception e) {
-			return false;
+
+			try {
+				
+				wbl.sendKeys(Keys.LEFT_CONTROL);
+				wbl.click();
+
+				Thread.sleep(3000);
+				
+			} catch (Exception e1) {
+				return false;
+			}
 		}
 
 		return ret;

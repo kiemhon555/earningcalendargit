@@ -7,16 +7,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.model.Conf;
-import com.euroland.earningcalendar.service.LauncherService;
-import com.euroland.earningcalendar.model.CrawlSection;
-import com.euroland.earningcalendar.model.ElementConf;
+import com.euroland.earningcalendar.service.DefaultLauncherService;
 
 @Service("cnbc")
-public class CnbcLaucherService extends LauncherService {
+public class CnbcLaucherService extends DefaultLauncherService {
 
 	@Override
-	protected void sectionHandle(Conf conf, WebDriver driver) {
+	protected boolean sectionHandle(WebDriver driver, String configPath) {
 
 		// https://www.cnbc.com/earnings-calendar/
 		// date wil be custom
@@ -74,11 +71,13 @@ public class CnbcLaucherService extends LauncherService {
 						}
 					}
 
-					crawl(conf, driver);
+//					crawl(conf, driver);
 					// next click if no more, hasNext => false
 				}
 			}
 		}
+		
+		return true;
 		
 	}
 
