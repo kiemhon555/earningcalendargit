@@ -19,7 +19,7 @@ public class Producer {
 	private static final String EXCHANGE = "crawler.exchange";
 	private static final String ROUTING_KEY = "crawler_routing_key";
 
-	public void produce(CrawlingResult crawlingResult) {
+	public boolean produce(CrawlingResult crawlingResult) {
 		
 		MessagePostProcessor mpp = new MessagePostProcessor() {
 			@Override
@@ -30,7 +30,13 @@ public class Producer {
 			}
 		};
 
-		rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, crawlingResult, mpp);
+		try {
+			rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, crawlingResult, mpp);
+		} catch (Exception e) {
+			System.out.println("Failed to Send Data to Rabbit");
+			return false;
+		}
+		return true;
 	}
 
 	public Message postProcessMessage(Message message) throws AmqpException {

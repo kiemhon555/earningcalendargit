@@ -1,12 +1,9 @@
 package com.euroland.earningcalendar.util.db;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.Predicate;import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +29,7 @@ public class DbService {
 		
 		if(dbData != null) {
 			
-			result = distinctData(dbData, headerValue);
+			result = distinctData(dbData, getDistinctNewData(headerValue));
 			
 		} else {
 			
@@ -68,8 +65,7 @@ public class DbService {
 			}
 
 			if (addToDb) {
-//				System.out.println("this is not duplicate, add to db");
-				System.out.println(lio.get(1).getValue() + " -- " + lio.get(2).getValue());
+
 				ret.add(lio);
 			}
 		}
@@ -94,47 +90,19 @@ public class DbService {
 		return ret;
 	}
 	
-	private List<List<HeaderValue>> getNewConfig() {
-
-		String json = "";
-		try {
-			json = getStrFromFile(".\\src\\main\\resources\\companies\\new.json");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		List<List<HeaderValue>> l = new Gson().fromJson(
-				json, 
-				new TypeToken<List<List<HeaderValue>>>() {}.getType());
-		return l;
-	}
+	private List<List<HeaderValue>> getDistinctNewData(List<List<HeaderValue>> llhv) {
+		List<List<HeaderValue>> result = new ArrayList<>();
 	
-	private List<List<HeaderValue>> getOldConfig() {
-
-		String json = "";
-		try {
-			json = getStrFromFile(".\\src\\main\\resources\\companies\\old.json");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		List<List<HeaderValue>> l = new Gson().fromJson(
-				json, 
-				new TypeToken<List<List<HeaderValue>>>() {}.getType());
-		return l;
-	}
-	
-	private String getStrFromFile(String pathname) throws IOException {
-		FileInputStream fis = new FileInputStream(pathname);
-		StringBuilder sb = new StringBuilder();
-		Reader r = new InputStreamReader(fis, "UTF-8");
-		char[] buf = new char[1024];
-		int amt = r.read(buf);
-		while (amt > 0) {
-			sb.append(buf, 0, amt);
-			amt = r.read(buf);
-		}
-		fis.close();
-		return sb.toString();
+		List<String> ls= new ArrayList<>();
+		
+		llhv.stream().forEach( lhv -> {
+			ls.add(new Gson().toJson(lhv));
+		});
+		
+		ls.stream().distinct().collect(Collectors.toList()).forEach( s -> {
+			result.add(new Gson().fromJson(s, new TypeToken<List<HeaderValue>>() {}.getType()));
+		});
+		
+		return result;
 	}
 }

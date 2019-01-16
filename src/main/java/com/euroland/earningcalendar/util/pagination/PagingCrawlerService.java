@@ -2,6 +2,7 @@ package com.euroland.earningcalendar.util.pagination;
 
 import java.time.LocalDate;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,21 +11,17 @@ import org.springframework.stereotype.Service;
 import com.euroland.earningcalendar.model.PageConfig;
 import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
-import com.euroland.earningcalendar.util.data.DataCrawlerService;
+import com.euroland.earningcalendar.service.DefaultLauncherService;
 
 @Service
-public class PagingCrawlerService {
+public class PagingCrawlerService extends DefaultLauncherService{
 	
 	@Autowired
 	SeleniumService seleniumService;
 	
 	@Autowired
 	SeleniumHandler seleniumHandler;
-	
-	@Autowired
-	DataCrawlerService dataCrawlerService;
 
-	
 	// Index Marker is used for determining where will be the iteration in the selector
 	private static final String INDEX_MARKER = "(euroland)";
 	
@@ -44,7 +41,7 @@ public class PagingCrawlerService {
 		// Will Read The website on Config and load it
 		driver.get(urlCheck(page));
 		
-		if (!config.getIframe().equals("")) { // If dont have an Iframe value in config it will just load the website
+		if (config.getIframe() != null) { // If dont have an Iframe value in config it will just load the website
 			page = seleniumService.attributeOut(driver, config.getIframe(), "cssSelector", "src");
 			driver.get(page);
 		}
@@ -60,10 +57,10 @@ public class PagingCrawlerService {
 	}
 	
 	public void pageChecker(WebDriver driver, PageConfig config) {
-		if(config.getPagination().size() == 0) {
-			dataCrawlerService.dataLoader(driver, config);
+		if(config.getPagination() == null) {
+			initializeData(driver, config);
 		
-		} else if (config.getPagination().size() > 0){
+		} else {
 			// Will return the data from Reygie
 			// 0 means its the first index in the pagination
 			// size has -1 for the data gathering of the last index
@@ -121,8 +118,14 @@ public class PagingCrawlerService {
 						
 						if(!checkNullOrDisable(we))
 							continue;
+
+						String dd = config.getPagination().get(superCtr).getName();
+						if(dd.contains("Dropdown")) {
+							
+							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])));
+						}
 						
-						boolean status = seleniumHandler.webElementClick(we);
+						boolean status = seleniumHandler.webElementClick(driver, we);
 						if(!status) { // the loop will stop once the button cant click anymore
 							continue;
 						}
@@ -133,7 +136,7 @@ public class PagingCrawlerService {
 					}
 					
 					// for continue clicking function (like Load More note: The "name" in config must be "Click All")
-					if(config.getPagination().get(superCtr).getName().equals(FULL_CLICK_IDENTIFIER) && ctr < no - 1 )
+					if(config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER) && ctr < no - 1 )
 						continue;
 					
 					if(superCtr < stop) { 
@@ -149,7 +152,7 @@ public class PagingCrawlerService {
 					} else {
 						// Load Data
 						
-						loadData(driver, config);
+						initializeData(driver, config);
 					}
 				}
 			} else { // dynamic click
@@ -173,7 +176,8 @@ public class PagingCrawlerService {
 							status = false;
 						
 						if(status) {
-							status = seleniumHandler.webElementClick(we);
+							
+							status = seleniumHandler.webElementClick(driver, we);
 							if(!status) { // the loop will stop once the button cant click anymore
 								status = false;
 							}
@@ -187,10 +191,10 @@ public class PagingCrawlerService {
 					}
 					
 					// for continue clicking function (like Load More note: The "name" in config must be "Click All")
-					if(status == true && config.getPagination().get(superCtr).getName().equals(FULL_CLICK_IDENTIFIER)) {
+					if(status == true && config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER)) {
 						continue;
 
-					} else if(status || (!status && config.getPagination().get(superCtr).getName().equals(FULL_CLICK_IDENTIFIER))) {
+					} else if(status || (!status && config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER))) {
 						if(superCtr < stop) {
 							// instantiate buttonInstance until the maximum size of pagination/button types
 							buttonInstance(driver, config, superCtr + 1, stop);
@@ -201,7 +205,7 @@ public class PagingCrawlerService {
 								clickOnLoad = config.getPagination().get(superCtr).isClickOnLoad();
 						} else {
 							// Load Data
-							loadData(driver, config);
+							initializeData(driver, config);
 	
 						}
 					}
@@ -236,8 +240,9 @@ public class PagingCrawlerService {
 		return page;
 	}
 	
-	private void loadData(WebDriver driver, PageConfig config) {	
+	protected void initializeData(WebDriver driver, PageConfig config) {
 		
-		dataCrawlerService.dataLoader(driver, config);
+		loadData(driver, config);
+		
 	}
 }

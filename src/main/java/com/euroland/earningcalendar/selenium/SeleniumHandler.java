@@ -35,13 +35,12 @@ public class SeleniumHandler {
 		}
 	}
 
-	public boolean webElementClick(WebElement wbl) {
+	public boolean webElementClick(WebDriver driver, WebElement wbl) {
 		boolean ret = true;
 
 		try {
 			
 			wbl.click();
-			Thread.sleep(3000);
 			
 		} catch (Exception e) {
 
@@ -50,10 +49,22 @@ public class SeleniumHandler {
 				wbl.sendKeys(Keys.LEFT_CONTROL);
 				wbl.click();
 
-				Thread.sleep(3000);
-				
 			} catch (Exception e1) {
-				return false;
+				try {
+					
+					((JavascriptExecutor) driver).executeScript("window.scrollTo(document.body.scrollHeight,0)");
+					wbl.click();
+					
+				} catch (Exception e2) {
+					return false;
+				}
+			}
+		} finally {
+
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				
 			}
 		}
 

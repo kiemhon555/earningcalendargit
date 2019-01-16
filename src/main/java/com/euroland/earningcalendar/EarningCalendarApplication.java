@@ -11,6 +11,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.euroland.earningcalendar.model.Config;
+import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.model.date.DateConfig;
+import com.euroland.earningcalendar.model.event.EventConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.db.DbService;
@@ -41,12 +44,14 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	@Autowired
 	DbService dbService;
 
-	public static final String HOST = "http://10.10.18.62:8080";
+	public static final String HOST = "http://10.10.18.62:2000";
 	private static final String CONFIG_LINK = "/get_all_config";
 	private static final String DATE_CONFIG_LINK = "/get_crawler_config_by_id/1";
 	private static final String EVENT_CONFIG_LINK = "/get_crawler_config_by_id/2";
 
 	private static final String DEFAULT_CONFIG_FILE = ".\\src\\main\\resources\\companies\\page_conf.json";
+	private static final String DEFAULT_CONFIG_DATE_FILE = ".\\src\\main\\resources\\date\\date_conf.json";
+	private static final String DEFAULT_CONFIG_EVENT_FILE = ".\\src\\main\\resources\\event\\event_conf.json";
 	
 	public static void main(String[] args) {
 		SpringApplication.run(EarningCalendarApplication.class, args);
@@ -56,6 +61,7 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	public void run(String... args) {
 		boolean status = false;
 		
+		// Load Date and Event config from api
 		status = loadDateAndEventConfig();
 		
 		if (status) {
@@ -72,21 +78,20 @@ public class EarningCalendarApplication implements CommandLineRunner {
 			}
 			
 			if (wl != null) {
+				
 				wl.stream().forEach( w -> {
-					
-					crawlBeanFactory.getCrawl(w);
+					// Loading of each source
+					// This condition is for demo purposes
+					if(w.getCname().toLowerCase().equals("avanza")|| w.getCname().toLowerCase().equals("dfm")||w.getCname().toLowerCase().equals("teletrader"))
+						crawlBeanFactory.getCrawl(w);
 					
 				});
 			}
 			
-//			String json = "";
-//			try {
-//				json = confService.getStrFromFile(DEFAULT_CONFIG_FILE);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			crawlBeanFactory.getCrawl(new Config(2, "london", json));
+			// for resources location of page config
+//			PageConfig pc = (PageConfig) confService.prepareTestConf(DEFAULT_CONFIG_FILE, new PageConfig());
+//			
+//			crawlBeanFactory.getCrawl(new Config(1, 2, "defs", pc));
 		}
 	}
 	

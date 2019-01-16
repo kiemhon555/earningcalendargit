@@ -1,6 +1,7 @@
 package com.euroland.earningcalendar.service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
@@ -17,7 +18,6 @@ import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.db.DbService;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 import com.euroland.earningcalendar.util.rabbit.Producer;
-import com.google.gson.Gson;
 
 @Service("default")
 public class DefaultLauncherService {
@@ -51,10 +51,13 @@ public class DefaultLauncherService {
 			return status;
 		}
 		
+		// initialize crawled data list
+		dataCrawlerService.setCrawledData(new ArrayList<>());
+		
 		status = sectionHandle(driver, c.getConfig_text());
 		
 		if(status) {
-			status = crawl(driver, c.getSource_id());
+			status = processResult(driver, c.getSource_id());
 		}
 		
 		driver.close();
@@ -62,9 +65,7 @@ public class DefaultLauncherService {
 		return status;
 	}
 
-	protected boolean sectionHandle(WebDriver driver, String json) {
-
-		PageConfig config = new Gson().fromJson(json, PageConfig.class);
+	protected boolean sectionHandle(WebDriver driver, PageConfig config) {
 		
 		boolean status = false;
 		
@@ -75,10 +76,21 @@ public class DefaultLauncherService {
 		
 		return status;
 	}
-	
-	protected boolean crawl(WebDriver driver, int sourceId) {
+
+	protected void loadData(WebDriver driver, PageConfig config) {
 		
-		boolean status = true;
+		dataCrawlerService.dataLoader(driver, config);
+		
+	}
+	
+	private boolean processResult(WebDriver driver, int sourceId) {
+		
+		boolean status = false;
+		
+		if(dataCrawlerService.getCrawledData().size() == 0) {
+			System.out.println("No New Data Gathered");
+			return status;
+		}
 		
 		System.out.println("Filtering Duplicates ...");
 		
@@ -88,15 +100,16 @@ public class DefaultLauncherService {
 		
 		status = prepareResult(sourceId, data);
 
-		System.out.println("Sent to Rabbit");
+		if (status) {
+			System.out.println("Sent to Rabbit");
+		}
 		
 		return status;
 	}
 	
 	private boolean prepareResult(int sourceId,List<List<HeaderValue>> headerValue) {
-		boolean status = true;
 		
-		producer.produce(new CrawlingResult(sourceId, headerValue));
+		boolean status = producer.produce(new CrawlingResult(sourceId, headerValue));
 		
 		return status;
 	}

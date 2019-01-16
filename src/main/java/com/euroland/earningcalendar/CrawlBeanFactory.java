@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.euroland.earningcalendar.model.Config;
 import com.euroland.earningcalendar.service.DefaultLauncherService;
-import com.euroland.earningcalendar.service.companies.CnbcLaucherService;
+import com.euroland.earningcalendar.service.companies.LseLaucherService;
+import com.euroland.earningcalendar.service.companies.TmxLauncherService;
 
 @Component
 public class CrawlBeanFactory {
@@ -16,8 +17,12 @@ public class CrawlBeanFactory {
 	private DefaultLauncherService defaulLaucherService;
 	
 	@Autowired
-	@Qualifier("cnbc")
-	private CnbcLaucherService cnbcLaucherService;
+	@Qualifier("lse")
+	private LseLaucherService lseLaucherService;
+	
+	@Autowired
+	@Qualifier("tmx")
+	private TmxLauncherService tmxLauncherService;
 	
 	public CrawlBeanFactory() {
 		super();
@@ -25,11 +30,13 @@ public class CrawlBeanFactory {
 
 	public void getCrawl(Config config) {
 		
-		switch (config.getCname()) {
-		case "test1":
-			cnbcLaucherService.appRunner(config);
+		switch (config.getCname().toLowerCase()) {
+		case "financial diary":
+			lseLaucherService.appRunner(config);
 			break;
-
+		case "tmx money":
+			tmxLauncherService.appRunner(config);
+			break;
 		default:
 			defaulLaucherService.appRunner(config);
 			break;

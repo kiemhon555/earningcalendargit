@@ -2,6 +2,8 @@ package com.euroland.earningcalendar.util.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -23,10 +25,12 @@ public class DataCrawlerService {
 	@Autowired
 	SeleniumService seleniumService;
 	
-	private static final String ATTRIBUTE_OUT = "attributeOut";
-	private static final String ORIGINAL_DATE = "Original Date";
-	private static final String ORIGINAL_EVENT = "Original Event";
-	private static final String EVENT = "event";
+	public static final String ATTRIBUTE_OUT = "attributeOut";
+	public static final String ORIGINAL_DATE = "Original Date";
+	public static final String ORIGINAL_EVENT = "Original Event";
+	public static final String EVENT = "event";
+
+	private static final String REGEX_IDENTIFIER = "regex: ";
 	
 	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
 	
@@ -39,73 +43,26 @@ public class DataCrawlerService {
 		
 	}
 
+	public void setCrawledData(List<List<HeaderValue>> hvl) {
+		headerValueList = hvl;
+	}
+	
 	public List<List<HeaderValue>> getCrawledData() {
 		return headerValueList;
 	}
 	
 	private void loadData(WebDriver driver, CrawlingSection cs, String standardDate) {
 		
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		List<WebElement> wl = seleniumService.webElementsOut(
 				driver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
 
-//		for(WebElement w : wl) {
-//			
-//			List<HeaderValue> headerValue =  new ArrayList<>();
-//			
-//			if(cs.getDateDetails() != null) {
-//				// index 0 has the original date
-//				// index 1 has the modified date
-//				List<String> on = new ArrayList<>();
-//				on = getDateDetail(w, cs, standardDate);
-//				
-//				// Add Header Value for Original Date
-//				headerValue.add(new HeaderValue(
-//						ORIGINAL_DATE, 
-//						on.get(0)));
-//				System.out.println(ORIGINAL_DATE + " --- " + on.get(0));
-//				
-//				// Add Header Value of Modifed Date
-//				headerValue.add(new HeaderValue(
-//						cs.getDateDetails().getFullDate().getName(), 
-//						on.get(1)));
-//				System.out.println(cs.getDateDetails().getFullDate().getName() + " --- " + on.get(1));
-//
-//			}
-//			
-//			for(ElementData b : cs.getBasicDetails()) {
-//	
-//				String header = b.getName();
-//				String value = "";
-//				
-//				// Get values from the Website
-//				if(b == cs.getBasicDetails().get(0)) { // Company name must be always on first array
-//					if(b.getType().equals(ATTRIBUTE_OUT)) {
-//						value = w.getAttribute(b.getRef());
-//					} else {
-//						value = w.getText();
-//					}
-//					value = isSplit(value, b.getSplitter(), b.getPosition());
-//				} else {
-//					value = textOrAttribute(w, b);
-//				}
-//				
-//				// if there is a event
-//				if(header.toLowerCase().equals(EVENT)) {
-//					// Add Header Value for Original Event Name
-//					header = ORIGINAL_EVENT;
-//					headerValue.add(new HeaderValue(header, value));
-//					// Add Header Value for Modified Event Name
-//					header = b.getName();
-//					value = EventMatcherService.getEvent(value);
-//				}
-//				System.out.println(header + " --- " + value);
-//				// Add Header Value for Basic Details
-//				headerValue.add(new HeaderValue(header, value));
-//			}
-//			
-//			headerValueList.add(headerValue);
-//		}
-		
 		wl.stream().forEach( w -> {
 			
 			List<HeaderValue> headerValue =  new ArrayList<>();
@@ -140,7 +97,11 @@ public class DataCrawlerService {
 					if(b.getType().equals(ATTRIBUTE_OUT)) {
 						value = w.getAttribute(b.getRef());
 					} else {
-						value = w.getText();
+						if (b.getSelectorType().equals("ownText")) {
+							value = seleniumService.textOut(w, ".", b.getSelectorType());
+						} else {
+							value = w.getText();
+						}
 					}
 					value = isSplit(value, b.getSplitter(), b.getPosition());
 				} else {
@@ -163,11 +124,12 @@ public class DataCrawlerService {
 				headerValue.add(new HeaderValue(header, value));
 			});
 			
+			System.out.println("===============================");
 			headerValueList.add(headerValue);
 		});
 	}
 	
-	private List<String> getDateDetail(WebElement we, CrawlingSection cs, String standardDate) {
+	public List<String> getDateDetail(WebElement we, CrawlingSection cs, String standardDate) {
 
 		String date = "";
 
@@ -179,7 +141,7 @@ public class DataCrawlerService {
 		// index 1 has the modified date
 		List<String> on = new ArrayList<>();
 		
-		if(details.getSplitDate().size() ==0 ) {
+		if(details.getSplitDate() == null) {
 			date = textOrAttribute(we, details.getFullDate());
 			pattern = details.getDatePattern();
 			
@@ -204,7 +166,7 @@ public class DataCrawlerService {
 		return on;
 	}
 	
-	private String textOrAttribute(WebElement we, ElementData ed) {
+	public String textOrAttribute(WebElement we, ElementData ed) {
 		
 		String result = "";
 		
@@ -219,11 +181,25 @@ public class DataCrawlerService {
 		return result;
 	}
 	
-	private String isSplit(String text, String splitter, int pos) {
+	public String isSplit(String text, String splitter, int pos) {
 		String result = text;
 		
-		if(!splitter.equals("")) {
-			result = text.split(splitter)[pos];
+		if(splitter != null) {
+			try {
+				if(text.contains(splitter)) {
+					result = text.split(splitter)[pos];
+				} else if (splitter.contains(REGEX_IDENTIFIER)) {
+					
+					Pattern p = Pattern.compile(splitter.split(REGEX_IDENTIFIER)[1]);
+					Matcher m = p.matcher(text);
+
+					if(m.find()) {
+					    result = m.group(1);
+					}
+				}
+			} catch (Exception e) {
+				result = "";
+			}
 		} 
 		
 		return result;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -22,22 +23,25 @@ public class EventMatcherService {
 	final String EVENT_CONFIG_FILE = ".\\src\\main\\resources\\event\\event_conf.json";
 	final static String LOCALE_CODE = "utf-8";
 	
-	private static Map<String, List<String>> eventList = new HashMap<>();
+	public static Map<String, List<String>> eventList = new HashMap<>();
 	
 	public static String getEvent(String event) {
 
+		String result = "";
+		
 		String trans = event.toLowerCase(Locale.forLanguageTag(LOCALE_CODE));
 		
 		// Search for the event translation in the config
 		List<Entry<String, List<String>>> e = eventList.entrySet().stream().filter( l -> 
-			l.getValue().contains(trans.trim())
+			l.getValue().stream().anyMatch(trans::contains)
 		).collect(Collectors.toList());
 		
 		if(e.size() != 0) {
-			event = e.get(0).getKey();
+			// If there is a match
+			result = e.get(0).getKey();
 		}
 		
-		return event;
+		return result;
 	}
 	
 	public boolean loadEventConfig(String path) {
@@ -45,7 +49,7 @@ public class EventMatcherService {
 		
 		EventConfig ec = (EventConfig) confService.prepareTestConf(path, new EventConfig());
 		if(ec != null) {
-			eventList = ec.getEventTranslations();
+			eventList = new TreeMap<String, List<String>>(ec.getEventTranslations()).descendingMap();
 			status = true;
 		}
 		return status;

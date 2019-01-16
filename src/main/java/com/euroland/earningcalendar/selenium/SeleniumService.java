@@ -65,8 +65,21 @@ public class SeleniumService {
 
 	public String textOut(WebElement driver, String element, String elmType) {
 		String ret = "";
-		ret = webElementOut(driver, element, elmType).getText().toString();
-		return ret;
+		
+		if(elmType.equals("ownText")) {
+			WebElement we = webElementOut(driver, element, "xpath");
+			ret = we.getText();
+			List<WebElement> childs = webElementsOut(we, "./*", "xpath");
+			for(WebElement e : childs) {
+				 ret = ret.replaceFirst(e.getText(), "");
+			}
+		} else {
+			WebElement we = webElementOut(driver, element, elmType);
+			if(we != null)
+				ret = we.getText().toString();
+		}
+		
+		return ret.trim();
 	}
 
 	public WebElement webElementOut(WebElement driver, String element, String elmType) {
@@ -76,7 +89,7 @@ public class SeleniumService {
 				element.trim().replace(" ", ".");
 				ret = driver.findElement(By.cssSelector(element));
 			}
-			if (elmType.equals("xpath"))
+			if (elmType.equals("xpath") || elmType.equals("ownText"))
 				ret = driver.findElement(By.xpath(element));
 			if (elmType.equals("className"))
 				ret = driver.findElement(By.className(element));
@@ -105,7 +118,7 @@ public class SeleniumService {
 				element.replace(" ", ".");
 				ret = driver.findElements(By.cssSelector(element));
 			}
-			if (elmType.equals("xpath"))
+			if (elmType.equals("xpath") || elmType.equals("ownText"))
 				ret = driver.findElements(By.xpath(element));
 			if (elmType.equals("className"))
 				ret = driver.findElements(By.className(element));
@@ -153,7 +166,7 @@ public class SeleniumService {
 				element.trim().replace(" ", ".");
 				ret = driver.findElement(By.cssSelector(element));
 			}
-			if (elmType.equals("xpath"))
+			if (elmType.equals("xpath") || elmType.equals("ownText"))
 				ret = driver.findElement(By.xpath(element));
 			if (elmType.equals("className"))
 				ret = driver.findElement(By.className(element));
@@ -182,7 +195,7 @@ public class SeleniumService {
 			if (elmType.equals("cssSelector")) {
 				ret = driver.findElements(By.cssSelector(element));
 			}
-			if (elmType.equals("xpath"))
+			if (elmType.equals("xpath") || elmType.equals("ownText"))
 				ret = driver.findElements(By.xpath(element));
 			if (elmType.equals("className"))
 				ret = driver.findElements(By.className(element));

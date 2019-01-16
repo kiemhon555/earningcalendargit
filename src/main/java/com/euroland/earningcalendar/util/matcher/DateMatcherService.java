@@ -1,8 +1,11 @@
 package com.euroland.earningcalendar.util.matcher;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.IsoFields;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -35,8 +38,8 @@ public class DateMatcherService {
 	final static String REGEX_DELIMITER = "[,-/ ]+";
 	final static String DELIMITER = " ";
 	
-	private static Map<String, List<String>> moList = new HashMap<>();
-	private static Map<String, DatePattern> patternList = new HashMap<>();
+	public static Map<String, List<String>> moList = new HashMap<>();
+	public static Map<String, DatePattern> patternList = new HashMap<>();
 	
 	// Return Empty String if failed to Match
 	public static String getDate(String date, String pattern, String format) {
@@ -46,7 +49,8 @@ public class DateMatcherService {
 		String dateChanged = "No Match";
 		DateTimeFormatter formatter = null;
 		
-		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER);
+		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER).toLowerCase();
+
 		if (!d.contains(DELIMITER)) {
 			return modifiedDate;
 		}
@@ -64,8 +68,20 @@ public class DateMatcherService {
 			if(Integer.parseInt(s[dp.getYear()]) < 100) {
 				f = DEFAULT_DATE_FORMAT_2;
 			}
-			dateChanged = s[dp.getYear()] + "-" + modify(s[dp.getMonth()]) + "-" + modify(s[dp.getDay()]);
+			
+			String day = s[dp.getDay()].replaceAll("\\D", "");
+			
+			dateChanged = s[dp.getYear()] + "-" + modify(s[dp.getMonth()]) + "-" + modify(day);
 	
+		} else if (d.contains("kw") || d.contains("week")){
+			
+			String str = d.replaceAll("[^-?0-9]+", "");
+			
+			int w = Integer.parseInt(str);
+			
+			LocalDate desiredDate = LocalDate.now().with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, w).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+			
+			dateChanged = desiredDate.toString();
 		}
 		
 		if (!dateChanged.equals("No Match")) {
@@ -102,7 +118,7 @@ public class DateMatcherService {
 		String m = "No Match";
 		
 		List<Entry<String, List<String>>> e = moList.entrySet().stream().filter( l -> 
-			l.getValue().contains(mod.toLowerCase())
+			l.getValue().contains(mod)
 		).collect(Collectors.toList());
 		
 		if(e.size() != 0) {
