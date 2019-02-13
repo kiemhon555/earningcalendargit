@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.CrawlingSection;
 import com.euroland.earningcalendar.model.ElementData;
-import com.euroland.earningcalendar.model.HeaderValue;
 import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.model.data.HeaderValue;
 import com.euroland.earningcalendar.model.date.DateDetails;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;

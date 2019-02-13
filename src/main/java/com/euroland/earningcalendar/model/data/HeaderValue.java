@@ -1,4 +1,4 @@
-package com.euroland.earningcalendar.model;
+package com.euroland.earningcalendar.model.data;
 
 public class HeaderValue {
 	private String header;

@@ -11,8 +11,8 @@ import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.CrawlingSection;
-import com.euroland.earningcalendar.model.HeaderValue;
 import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.model.data.HeaderValue;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
