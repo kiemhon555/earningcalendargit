@@ -1,66 +1,64 @@
 {
-	"website": "https://se.investing.com/earnings-calendar/",
+	"name" : "Dfm",
+	"website": "https://www.dfm.ae/issuers/listed-securities/financial-reports",
 	"standardDate" : "MM-dd-yyyy",
-	"iframe": "",
 	"pagination": [
 		{
-			"name" : "Pop Up",
+			"name" : "Click Last to Enable First",
 			"clicks": "1",
 			"selectorType" : "xpath",
-			"selector" : "//*[@id=\"PromoteSignUpPopUp\"]/div[2]/i",
+			"selector" : "//*[@id=\"btnLast\"]",
 			"clickOnLoad" : "true",
 			"index" : 0,
 			"incrementation" : 1
 		}, {
-			"name" : "This Week and Next Week",
-			"clicks": "6",
+			"name" : "Click First to Enable Next",
+			"clicks": "1",
 			"selectorType" : "xpath",
-			"selector" : "//*[@id=\"earningsCalendarFilters\"]/div[1]/a[(euroland)]",
+			"selector" : "//*[@id=\"btnFirst\"]",
 			"clickOnLoad" : "true",
-			"index" : 4,
+			"index" : 0,
+			"incrementation" : 1
+		}, {
+			"name" : "Click Next",
+			"clicks": "3",
+			"selectorType" : "xpath",
+			"selector" : "//*[@id=\"btnNext\"]",
+			"clickOnLoad" : "false",
+			"index" : 0,
 			"incrementation" : 1
 		}
 	],
 	"crawlingSections" : [
 		{
 			"dateDetails" : {
-				"datePattern" : "pattern-5",
+				"datePattern" : "pattern-2",
 				"fullDate" : { 
 					"name" : "Date",
 					"type" : "txtOut",
-					"ref" : "",
-					"selector" : "ancestor::tr/preceding::tr[@tablesorterdivider][1]",
+					"selector" : "ancestor::div/span[@class='my-date']",
 					"selectorType" : "xpath",
-					"splitter" : "",
+					"splitter" : " ",
 					"position" : 0
-				},
-				"splitDate" : []
+				}
 			},
 			"basicDetails" : [
 				{
-					"name": "Company Name",
-					"type" : "txtOut",
-					"ref" : "",
-					"selectorType": "xpath",
-					"selector": "//*[@id=\"earningsCalendarData\"]/tbody/tr[*]/td[2]/span",
-					"splitter" : "",
-					"position" : 0
-				}, {
 					"name": "Symbol",
 					"type" : "txtOut",
-					"ref" : "",
+					"selectorType": "cssSelector",
+					"selector": "#container > div.feed-table-container > div > table > tbody > tr:nth-child(n) > td.it1 > div > span.name > a"
+				}, {
+					"name": "Event",
+					"type" : "txtOut",
 					"selectorType": "xpath",
-					"selector": "ancestor::tr/td[2]/a",
-					"splitter" : "",
-					"position" : 0
+					"selector": "ancestor::td/p/a"
 				}, {
 					"name": "Url",
 					"type" : "attributeOut",
 					"ref" : "href",
 					"selectorType": "xpath",
-					"selector": "ancestor::tr/td[2]/a",
-					"splitter" : "",
-					"position" : 0
+					"selector": "ancestor::span/a"
 				}
 			]
 		}

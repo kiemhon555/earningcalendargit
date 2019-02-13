@@ -1,67 +1,32 @@
 package com.euroland.earningcalendar.util.pagination;
 
-import java.time.LocalDate;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.euroland.earningcalendar.model.ElementBtn;
 import com.euroland.earningcalendar.model.PageConfig;
-import com.euroland.earningcalendar.selenium.SeleniumHandler;
-import com.euroland.earningcalendar.selenium.SeleniumService;
-import com.euroland.earningcalendar.service.DefaultLauncherService;
+import com.euroland.earningcalendar.service.LauncherService;
 
-@Service
-public class PagingCrawlerService extends DefaultLauncherService{
-	
-	@Autowired
-	SeleniumService seleniumService;
-	
-	@Autowired
-	SeleniumHandler seleniumHandler;
+@Service("default")
+public class PagingCrawlerService extends LauncherService{
 
 	// Index Marker is used for determining where will be the iteration in the selector
 	private static final String INDEX_MARKER = "(euroland)";
 	
 	// To identify if need to click the button before recursion/load data
-	private static final String FULL_CLICK_IDENTIFIER = "Click All";
+	private static final String FULL_CLICK_IDENTIFIER = "click all";
 
-	// To identify start date if have for the url loading
-	private static final String START_DATE_EURO = "(startDateEuro)";
-
-	// To identify end date if have for the url loading
-	private static final String END_DATE_EURO = "(endDateEuro)";
+	// To identify if the button is a drop down type
+	private static final String DROPDOWN_IDENTIFIER = "dropdown";
 	
-	public void pageLoader(WebDriver driver, PageConfig config) {
-		
-		String page = config.getWebsite();
-		
-		// Will Read The website on Config and load it
-		driver.get(urlCheck(page));
-		
-		if (config.getIframe() != null) { // If dont have an Iframe value in config it will just load the website
-			page = seleniumService.attributeOut(driver, config.getIframe(), "cssSelector", "src");
-			driver.get(page);
-		}
-		
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} // 10 sec wait time for popup
-		
-		pageChecker(driver, config);
-	}
-	
-	public void pageChecker(WebDriver driver, PageConfig config) {
+	@Override
+	protected void pageNavigation(WebDriver driver, PageConfig config) {
 		if(config.getPagination() == null) {
-			initializeData(driver, config);
+			loadData(driver, config);
 		
 		} else {
-			// Will return the data from Reygie
 			// 0 means its the first index in the pagination
 			// size has -1 for the data gathering of the last index
 			buttonInstance(driver, config, 0, config.getPagination().size()-1);
@@ -81,13 +46,14 @@ public class PagingCrawlerService extends DefaultLauncherService{
 		return i;  
 	}
 	
-	
 	public void buttonInstance(WebDriver driver, PageConfig config, int superCtr, int stop) {
+		
+			ElementBtn btn = config.getPagination().get(superCtr);
 		
 			// Will Check if the clicks of the button is dynamic or constant
 			// value 0 if dynamic
 			// value != if constant
-			int no = isNumeric(config.getPagination().get(superCtr).getClicks());
+			int no = isNumeric(btn.getClicks());
 			
 			
 			// note that the for loop is looping constantly wether what happen to the button click
@@ -95,14 +61,14 @@ public class PagingCrawlerService extends DefaultLauncherService{
 			
 			if ( no != 0) { // constant click
 				
-				boolean clickOnLoad = config.getPagination().get(superCtr).isClickOnLoad();
+				boolean clickOnLoad = btn.isClickOnLoad();
 				
 				// will get the index on config to now if the button incrementation is where to start
 				// also will get the incrementation on config to modify the incrementation needed
-				for (int ctr = config.getPagination().get(superCtr).getIndex(); 
-						ctr < no; ctr = ctr + config.getPagination().get(superCtr).getIncrementation()) {
+				for (int ctr = btn.getIndex(); 
+						ctr < no; ctr = ctr + btn.getIncrementation()) {
 
-					String st = config.getPagination().get(superCtr).getSelector(); // get the selector on config
+					String st = btn.getSelector(); // get the selector on config
 					
 					if(st.contains(INDEX_MARKER)) {
 						// if it has a Index Marker it will modify the iteration base on the config
@@ -114,19 +80,19 @@ public class PagingCrawlerService extends DefaultLauncherService{
 						
 						// Get button element
 						WebElement we = seleniumService.webElementOut(
-								driver, st, config.getPagination().get(superCtr).getSelectorType());
+								driver, st, btn.getSelectorType());
 						
-						if(!checkNullOrDisable(we))
+						if(!checkNullOrDisable(we) && !btn.getName().toLowerCase().contains("popup"))
 							continue;
 
-						String dd = config.getPagination().get(superCtr).getName();
-						if(dd.contains("Dropdown")) {
+						String dd = btn.getName();
+						if(dd.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
 							
 							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])));
 						}
 						
 						boolean status = seleniumHandler.webElementClick(driver, we);
-						if(!status) { // the loop will stop once the button cant click anymore
+						if((!status && !btn.getName().toLowerCase().contains("popup"))) { // the loop will continue until its on the limit
 							continue;
 						}
 						
@@ -136,33 +102,30 @@ public class PagingCrawlerService extends DefaultLauncherService{
 					}
 					
 					// for continue clicking function (like Load More note: The "name" in config must be "Click All")
-					if(config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER) && ctr < no - 1 )
+					if(btn.getName().toLowerCase().contains(FULL_CLICK_IDENTIFIER) && ctr < no - 1 )
 						continue;
 					
 					if(superCtr < stop) { 
-						
 						// initiate buttonInstance
 						buttonInstance(driver, config, superCtr + 1, stop);
 						
 						// change click load to its default if button instance is more than 1
 						// 0 is the index so more than zero mean more than 1 button instance
-						if(superCtr > 1)
-							clickOnLoad = config.getPagination().get(superCtr).isClickOnLoad();
-						
+						if(ctr >= no-1)
+							clickOnLoad = btn.isClickOnLoad();
 					} else {
 						// Load Data
-						
-						initializeData(driver, config);
+						loadData(driver, config);
 					}
 				}
 			} else { // dynamic click
-				
-				int ctr = config.getPagination().get(superCtr).getIndex(); // get index for ctr
+
+				int ctr = btn.getIndex(); // get index for ctr
 				boolean status = true;
-				boolean clickOnLoad = config.getPagination().get(superCtr).isClickOnLoad();
+				boolean clickOnLoad = btn.isClickOnLoad();
 				while(status) { 
 
-					String st = config.getPagination().get(superCtr).getSelector(); // get the selector on config
+					String st = btn.getSelector(); // get the selector on config
 					st = st.replace(INDEX_MARKER, Integer.toString(ctr)); // replace index of the selector
 					
 					// This will check if the button is need to be clicked on load or not
@@ -170,19 +133,25 @@ public class PagingCrawlerService extends DefaultLauncherService{
 						
 						// Get button element
 						WebElement we = seleniumService.webElementOut(
-								driver, st, config.getPagination().get(superCtr).getSelectorType());
+								driver, st, btn.getSelectorType());
 						
 						if(!checkNullOrDisable(we))
 							status = false;
 						
+						String dd = btn.getName();
+						if(dd.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
+							
+							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])));
+						}
+						
 						if(status) {
 							
 							status = seleniumHandler.webElementClick(driver, we);
-							if(!status) { // the loop will stop once the button cant click anymore
+							if((!status)) { // the loop will stop once the button cant click anymore
 								status = false;
 							}
 							
-							ctr = ctr + config.getPagination().get(superCtr).getIncrementation(); // process the incrementation of the ctr
+							ctr = ctr + btn.getIncrementation(); // process the incrementation of the ctr
 						}
 
 					} else {
@@ -191,21 +160,21 @@ public class PagingCrawlerService extends DefaultLauncherService{
 					}
 					
 					// for continue clicking function (like Load More note: The "name" in config must be "Click All")
-					if(status == true && config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER)) {
+					if(status == true &&btn.getName().toLowerCase().contains(FULL_CLICK_IDENTIFIER)) {
 						continue;
 
-					} else if(status || (!status && config.getPagination().get(superCtr).getName().contains(FULL_CLICK_IDENTIFIER))) {
+					} else if(status || (!status && btn.getName().toLowerCase().contains(FULL_CLICK_IDENTIFIER))) {
 						if(superCtr < stop) {
 							// instantiate buttonInstance until the maximum size of pagination/button types
 							buttonInstance(driver, config, superCtr + 1, stop);
 							
 							// change click load to its default if button instance is more than 1
 							// 0 is the index so more than zero mean more than 1 button instance
-							if(superCtr > 1)
-								clickOnLoad = config.getPagination().get(superCtr).isClickOnLoad();
+							if(!status)
+								clickOnLoad = btn.isClickOnLoad();
 						} else {
 							// Load Data
-							initializeData(driver, config);
+							loadData(driver, config);
 	
 						}
 					}
@@ -224,25 +193,5 @@ public class PagingCrawlerService extends DefaultLauncherService{
 			result = false;
 		}
 		return result;
-	}
-	
-	private String urlCheck(String page) {
-		
-		if(page.contains("(endDateEuro)")) {
-			
-			LocalDate ld = LocalDate.now();
-			
-			page = page.replace(START_DATE_EURO, ld.toString());
-			page = page.replace(END_DATE_EURO, ld.plusMonths(3).toString());
-			
-		}
-		
-		return page;
-	}
-	
-	protected void initializeData(WebDriver driver, PageConfig config) {
-		
-		loadData(driver, config);
-		
 	}
 }

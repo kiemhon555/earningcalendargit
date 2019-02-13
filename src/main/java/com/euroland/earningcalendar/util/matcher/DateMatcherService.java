@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.date.DateConfig;
-import com.euroland.earningcalendar.model.date.DatePattern;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 
 @Service
@@ -35,11 +34,11 @@ public class DateMatcherService {
 	final static String DEFAULT_DATE_FORMAT_2 = "yy-MM-dd";
 	final static String DEFAULT_PATTERN = "pattern-0"; // yyyy=MM-dd
 	
-	final static String REGEX_DELIMITER = "[,-/ ]+";
+	final static String REGEX_DELIMITER = "['-/ ]+";
 	final static String DELIMITER = " ";
 	
 	public static Map<String, List<String>> moList = new HashMap<>();
-	public static Map<String, DatePattern> patternList = new HashMap<>();
+	public static Map<String, String> patternList = new HashMap<>();
 	
 	// Return Empty String if failed to Match
 	public static String getDate(String date, String pattern, String format) {
@@ -51,27 +50,29 @@ public class DateMatcherService {
 		
 		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER).toLowerCase();
 
-		if (!d.contains(DELIMITER)) {
-			return modifiedDate;
-		}
+//		if (!d.contains(DELIMITER)) {
+//			return modifiedDate;
+//		}
 		
 		if(pattern.equals(""))
 			pattern = DEFAULT_PATTERN;
 		
-		DatePattern dp = patternList.get(pattern);
 		String f = DEFAULT_DATE_FORMAT_1;
 	
-		Matcher m = Pattern.compile(dp.getRegex()).matcher(d);
+		Matcher m = Pattern.compile(patternList.get(pattern)).matcher(d);
 		if(m.find()) { // if match found
 			
-			String[] s = m.group().split(DELIMITER);
-			if(Integer.parseInt(s[dp.getYear()]) < 100) {
+			String year = m.group("year");
+			String month = m.group("month");
+			String day = m.group("day");
+			
+			if(Integer.parseInt(year) < 100) {
 				f = DEFAULT_DATE_FORMAT_2;
 			}
 			
-			String day = s[dp.getDay()].replaceAll("\\D", "");
+			day = day.replaceAll("\\D", "");
 			
-			dateChanged = s[dp.getYear()] + "-" + modify(s[dp.getMonth()]) + "-" + modify(day);
+			dateChanged = year + "-" + modify(month) + "-" + modify(day);
 	
 		} else if (d.contains("kw") || d.contains("week")){
 			

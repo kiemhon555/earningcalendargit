@@ -1,4 +1,4 @@
-package com.euroland.earningcalendar.util.rabbit;
+package com.euroland.earningcalendar.rabbit;
 
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
@@ -36,6 +36,7 @@ public class Producer {
 			System.out.println("Failed to Send Data to Rabbit");
 			return false;
 		}
+		
 		return true;
 	}
 

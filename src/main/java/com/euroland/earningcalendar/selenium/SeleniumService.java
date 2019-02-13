@@ -76,7 +76,11 @@ public class SeleniumService {
 		} else {
 			WebElement we = webElementOut(driver, element, elmType);
 			if(we != null)
-				ret = we.getText().toString();
+				ret = we.getText();
+		}
+		
+		if(ret.matches("^[*!-.—_]+$")) {
+			ret = "";
 		}
 		
 		return ret.trim();
@@ -143,8 +147,17 @@ public class SeleniumService {
 		String ret = "";
 		WebElement we = webElementOut(driver, element, elmType);
 		
-		if(we != null)
-				ret = we.getAttribute(attribute).toString();
+		if(we != null) {
+			try {
+				ret = we.getAttribute(attribute);
+			} catch (Exception e) {
+				ret = "";
+			}
+			
+			if(ret == null) {
+				ret = "";
+			}
+		}
 		
 		return ret;
 	}
@@ -153,7 +166,7 @@ public class SeleniumService {
 		String ret = "";
 		WebElement we = webElementOut(driver, element, elmType);
 		if(we != null)
-				ret = we.getText().toString();
+				ret = we.getText();
 			
 		return ret;
 	}
@@ -219,7 +232,19 @@ public class SeleniumService {
 
 	public String attributeOut(WebDriver driver, String element, String elmType, String attribute) {
 		String ret = "";
-		ret = webElementOut(driver, element, elmType).getAttribute(attribute).toString();
+		WebElement we = webElementOut(driver, element, elmType);
+		
+		if(we != null) {
+			try {
+				ret = we.getAttribute(attribute);
+			} catch (Exception e) {
+				ret = "";
+			}
+			
+			if(ret == null) {
+				ret = "";
+			}
+		}
 		return ret;
 	}
 

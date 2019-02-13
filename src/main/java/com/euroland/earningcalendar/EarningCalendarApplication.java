@@ -10,7 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.euroland.earningcalendar.model.Config;
+import com.euroland.earningcalendar.model.SourceConfig;
 import com.euroland.earningcalendar.model.PageConfig;
 import com.euroland.earningcalendar.model.date.DateConfig;
 import com.euroland.earningcalendar.model.event.EventConfig;
@@ -45,16 +45,19 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	DbService dbService;
 
 	public static final String HOST = "http://10.10.18.62:2000";
-	private static final String CONFIG_LINK = "/get_all_config";
+	private static final String CONFIG_LINK = "/get_all_source_config";
 	private static final String DATE_CONFIG_LINK = "/get_crawler_config_by_id/1";
 	private static final String EVENT_CONFIG_LINK = "/get_crawler_config_by_id/2";
 
 	private static final String DEFAULT_CONFIG_FILE = ".\\src\\main\\resources\\companies\\page_conf.json";
-	private static final String DEFAULT_CONFIG_DATE_FILE = ".\\src\\main\\resources\\date\\date_conf.json";
-	private static final String DEFAULT_CONFIG_EVENT_FILE = ".\\src\\main\\resources\\event\\event_conf.json";
 	
 	public static void main(String[] args) {
+		
 		SpringApplication.run(EarningCalendarApplication.class, args);
+		
+		System.exit(0);
+		
+		return;
 	}
 
 	@Override
@@ -66,12 +69,12 @@ public class EarningCalendarApplication implements CommandLineRunner {
 		
 		if (status) {
 
-			List<Config> wl = null;
+			List<SourceConfig> wl = null;
 
 			String json = "";
 			try {
 				json = confService.readUrl(HOST + CONFIG_LINK);
-				wl = new Gson().fromJson(json, new TypeToken<List<Config>>(){}.getType());
+				wl = new Gson().fromJson(json, new TypeToken<List<SourceConfig>>(){}.getType());
 			} catch (Exception e) {
 				System.out.println("Failed to Load Sources");
 				return;
@@ -82,16 +85,16 @@ public class EarningCalendarApplication implements CommandLineRunner {
 				wl.stream().forEach( w -> {
 					// Loading of each source
 					// This condition is for demo purposes
-					if(w.getCname().toLowerCase().equals("avanza")|| w.getCname().toLowerCase().equals("dfm")||w.getCname().toLowerCase().equals("teletrader"))
+					if(w.getSourceId() == 33)
 						crawlBeanFactory.getCrawl(w);
 					
 				});
 			}
 			
-			// for resources location of page config
+//			// for resources location of page config
 //			PageConfig pc = (PageConfig) confService.prepareTestConf(DEFAULT_CONFIG_FILE, new PageConfig());
 //			
-//			crawlBeanFactory.getCrawl(new Config(1, 2, "defs", pc));
+//			crawlBeanFactory.getCrawl(new SourceConfig(33, 32, "def", pc));
 		}
 	}
 	

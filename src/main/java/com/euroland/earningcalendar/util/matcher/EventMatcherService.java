@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,8 @@ public class EventMatcherService {
 		
 		// Search for the event translation in the config
 		List<Entry<String, List<String>>> e = eventList.entrySet().stream().filter( l -> 
-			l.getValue().stream().anyMatch(trans::contains)
+			l.getValue().stream().map(s -> s = "(?:.*)" + s + "(?:.*)").collect(Collectors.toList())
+			.stream().anyMatch(trans::matches)
 		).collect(Collectors.toList());
 		
 		if(e.size() != 0) {

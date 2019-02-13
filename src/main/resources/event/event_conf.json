@@ -1,0 +1,29 @@
+{
+	"eventTranslations" : {
+		"Q1": 
+			["q1", "q01", "1q", "first quarter", "1st quarter", "1kv", "3kk"],
+			
+		"Q2": 
+			["q2", "q02", "2q", "second quarter", "2nd quarter", "2kv", "6kk", "half year results", "semi-annual report"],
+			
+		"Q3": 
+			["q3", "q03", "3q", "third quarter", "3rd quarter", "3kv", "9kk"],
+			
+		"Q4": 
+			["q4", "q04", "4q", "fourth quarter", "4th quarter", "4kv", "full year results"],
+		"Year End": 
+			["year end", "bokslutskommuniké", "tilinpäätös", "tilinpäätöstiedote"],
+			
+		"Annual Report": 
+			["annual report", "årsredovisning", "årsrapport", "årsberetning", "vuosikertomus", "vuosi"],
+			
+		"Interim Report": 
+			["interim report", "interim", "delårsrapport", "osavouosikertumos", "osavuosikatsus", "osavuosikatsaus"],
+			
+		"Annual General Meeting": 
+			["agm", "annual general meeting", "årstämma", "generalförsamling", "bolagsstämma"],
+			
+		"Extraordinary General Meeting": 
+			["egm", "extraordinary general meeting", "extrastämma", "ylimääräinen yhtiökokous"]
+	}
+}

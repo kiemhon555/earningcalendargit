@@ -1,4 +1,4 @@
-package com.euroland.earningcalendar.util.rabbit;
+package com.euroland.earningcalendar.rabbit;
 
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessageProperties;
@@ -23,6 +23,7 @@ public class RabbitMqConfig {
 		MessageProperties messageProperties = new MessageProperties();
 		messageProperties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 		template.setMessageConverter(jsonMessageConverter());
+		connectionFactory.clearConnectionListeners();
 		return template;
 	}
 

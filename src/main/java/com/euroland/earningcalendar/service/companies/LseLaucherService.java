@@ -4,38 +4,17 @@ import java.util.List;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.ElementBtn;
 import com.euroland.earningcalendar.model.PageConfig;
-import com.euroland.earningcalendar.selenium.SeleniumHandler;
-import com.euroland.earningcalendar.selenium.SeleniumService;
-import com.euroland.earningcalendar.service.DefaultLauncherService;
+import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
 @Service("lse")
-public class LseLaucherService extends DefaultLauncherService {
-
-	@Autowired
-	SeleniumService seleniumService;
-	
-	@Autowired
-	SeleniumHandler seleniumHandler;
+public class LseLaucherService extends PagingCrawlerService {
 	
 	@Override
-	protected boolean sectionHandle(WebDriver driver, PageConfig config) {
-		
-		boolean status = false;
-		
-		if(config != null) {
-			
-			driver.get(config.getWebsite());
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	protected void pageNavigation(WebDriver driver, PageConfig config) {
 			
 			List<ElementBtn> eb = config.getPagination();
 			
@@ -71,12 +50,6 @@ public class LseLaucherService extends DefaultLauncherService {
 
 				loadData(driver, config);
 			}
-			
-			
-			status = true;
-		}
-		
-		return status;
 	}
 
 }

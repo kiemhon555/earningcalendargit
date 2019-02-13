@@ -1,17 +1,16 @@
 package com.euroland.earningcalendar.util.db;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;import java.util.stream.Collector;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.EarningCalendarApplication;
+import com.euroland.earningcalendar.model.CrawlingResult;
 import com.euroland.earningcalendar.model.HeaderValue;
-import com.euroland.earningcalendar.model.HeaderValueData;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -21,6 +20,8 @@ public class DbService {
 
 	@Autowired
 	ConfService confService;
+	
+	private static final String PREVIOUS_CRAWLED_DATA_LINK = "/get_crawl_data_by_source_id/";
 	
 	public List<List<HeaderValue>> checkDuplicate(int sourceId, List<List<HeaderValue>> headerValue) {
 		List<List<HeaderValue>> result = null;
@@ -80,11 +81,12 @@ public class DbService {
 	private List<List<HeaderValue>> getPreviousDataFromDB (int sourceId) {
 		List<List<HeaderValue>> ret = null;
 		
-		HeaderValueData hvd = (HeaderValueData) confService.prepareTestConf(
-				EarningCalendarApplication.HOST + "/find_header_value/" + Integer.toString(sourceId), new HeaderValueData());
+		// getting previous data from db
+		CrawlingResult hvd = (CrawlingResult) confService.prepareTestConf(
+				EarningCalendarApplication.HOST + PREVIOUS_CRAWLED_DATA_LINK + Integer.toString(sourceId), new CrawlingResult());
 		
 		if (hvd != null) {
-			ret = hvd.getHeader_value();
+			ret = hvd.getResults();
 		}
 		
 		return ret;

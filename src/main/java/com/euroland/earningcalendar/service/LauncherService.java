@@ -1,35 +1,29 @@
 package com.euroland.earningcalendar.service;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.model.Config;
+import com.euroland.earningcalendar.model.SourceConfig;
 import com.euroland.earningcalendar.model.CrawlingResult;
 import com.euroland.earningcalendar.model.HeaderValue;
 import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.rabbit.Producer;
 import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.db.DbService;
-import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
-import com.euroland.earningcalendar.util.rabbit.Producer;
 
-@Service("default")
-public class DefaultLauncherService {
+@Service
+public class LauncherService {
 
 	@Autowired
 	protected SeleniumService seleniumService;
 	
 	@Autowired
 	protected SeleniumHandler seleniumHandler;
-	
-	@Autowired
-	protected PagingCrawlerService pagingCrawlerService;
 	
 	@Autowired
 	protected DataCrawlerService dataCrawlerService;
@@ -40,7 +34,7 @@ public class DefaultLauncherService {
 	@Autowired
 	private Producer producer;
 
-	public boolean appRunner(Config c) {
+	public boolean appRunner(SourceConfig c) {
 		
 		boolean status = false;
 		
@@ -52,12 +46,12 @@ public class DefaultLauncherService {
 		}
 		
 		// initialize crawled data list
-		dataCrawlerService.setCrawledData(new ArrayList<>());
+		dataCrawlerService.setCrawledData(null);
 		
-		status = sectionHandle(driver, c.getConfig_text());
+		status = pageLoader(driver, c.getConfigText());
 		
 		if(status) {
-			status = processResult(driver, c.getSource_id());
+			status = processResult(driver, c.getSourceId());
 		}
 		
 		driver.close();
@@ -65,22 +59,44 @@ public class DefaultLauncherService {
 		return status;
 	}
 
-	protected boolean sectionHandle(WebDriver driver, PageConfig config) {
+	public boolean pageLoader(WebDriver driver, PageConfig config) {
 		
 		boolean status = false;
 		
-		if(config != null) {
-			pagingCrawlerService.pageLoader(driver, config);
+		if(config == null) {
+			return status;
+		}
+		
+		String page = config.getWebsite();
+		
+		// Will Read The website on Config and load it
+		driver.get(page);
+		
+		if (config.getIframe() != null) { // If dont have an Iframe value in config it will just load the website
+			page = seleniumService.attributeOut(driver, config.getIframe(), "cssSelector", "src");
+			driver.get(page);
+		}
+		
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // 10 sec wait time for popup
+		
+		pageNavigation(driver, config);
+		
+		if(dataCrawlerService.getCrawledData().size() != 0) {
 			status = true;
 		}
 		
 		return status;
 	}
 
+	protected void pageNavigation(WebDriver driver, PageConfig config) {}
+	
 	protected void loadData(WebDriver driver, PageConfig config) {
-		
 		dataCrawlerService.dataLoader(driver, config);
-		
 	}
 	
 	private boolean processResult(WebDriver driver, int sourceId) {
@@ -101,7 +117,7 @@ public class DefaultLauncherService {
 		status = prepareResult(sourceId, data);
 
 		if (status) {
-			System.out.println("Sent to Rabbit");
+			System.out.println("Sent to Rabbit: " + data.size() + " Data");
 		}
 		
 		return status;

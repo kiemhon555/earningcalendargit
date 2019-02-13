@@ -7,14 +7,14 @@ public class CrawlingResult {
 	private int sourceId;
 	private List<List<HeaderValue>> results;
 	
-	public int getId() {
+	public int getSourceId() {
 		return sourceId;
 	}
-	
-	public void setId(int id) {
-		this.sourceId = id;
+
+	public void setSourceId(int sourceId) {
+		this.sourceId = sourceId;
 	}
-	
+
 	public List<List<HeaderValue>> getResults() {
 		return results;
 	}

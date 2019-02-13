@@ -6,7 +6,7 @@ import java.util.Map;
 public class DateConfig {
 
 	private Map<String, List<String>> monthTranslations;
-	private Map<String, DatePattern> dateRegexPatterns;
+	private Map<String, String> dateRegexPatterns;
 	
 	public Map<String, List<String>> getMonthTranslations() {
 		return monthTranslations;
@@ -16,11 +16,11 @@ public class DateConfig {
 		this.monthTranslations = monthTranslations;
 	}
 	
-	public Map<String, DatePattern> getDateRegexPatterns() {
+	public Map<String, String> getDateRegexPatterns() {
 		return dateRegexPatterns;
 	}
 	
-	public void setDateRegexPatterns(Map<String, DatePattern> dateRegexPatterns) {
+	public void setDateRegexPatterns(Map<String, String> dateRegexPatterns) {
 		this.dateRegexPatterns = dateRegexPatterns;
 	}
 

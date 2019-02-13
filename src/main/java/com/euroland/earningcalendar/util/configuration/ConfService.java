@@ -5,13 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
-
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 
@@ -57,7 +53,7 @@ public class ConfService {
 	public String getStrFromFile(String pathname) throws IOException {
 		FileInputStream fis = new FileInputStream(pathname);
 		StringBuilder sb = new StringBuilder();
-		Reader r = new InputStreamReader(fis, "Cp1252");
+		Reader r = new InputStreamReader(fis, "utf-8");
 		char[] buf = new char[1024];
 		int amt = r.read(buf);
 		
