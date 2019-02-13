@@ -1,4 +1,4 @@
-package com.euroland.earningcalendar.model.data;
+package com.euroland.earningcalendar.domain.model;
 
 import java.util.List;
 

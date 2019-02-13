@@ -10,10 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.euroland.earningcalendar.model.SourceConfig;
-import com.euroland.earningcalendar.model.PageConfig;
 import com.euroland.earningcalendar.model.date.DateConfig;
 import com.euroland.earningcalendar.model.event.EventConfig;
+import com.euroland.earningcalendar.model.source.PageConfig;
+import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.db.DbService;

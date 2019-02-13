@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.euroland.earningcalendar.model.SourceConfig;
+import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.service.companies.BenzingaLaucherService;
 import com.euroland.earningcalendar.service.companies.CnbcLaucherService;
 import com.euroland.earningcalendar.service.companies.LseLaucherService;

@@ -6,10 +6,10 @@ import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.model.SourceConfig;
-import com.euroland.earningcalendar.model.data.CrawlingResult;
-import com.euroland.earningcalendar.model.data.HeaderValue;
-import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.domain.model.CrawlingResult;
+import com.euroland.earningcalendar.domain.model.HeaderValue;
+import com.euroland.earningcalendar.model.source.PageConfig;
+import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.rabbit.Producer;
 import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;

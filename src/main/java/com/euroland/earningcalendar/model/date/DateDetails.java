@@ -2,7 +2,7 @@ package com.euroland.earningcalendar.model.date;
 
 import java.util.List;
 
-import com.euroland.earningcalendar.model.ElementData;
+import com.euroland.earningcalendar.model.source.ElementData;
 
 public class DateDetails {
 	

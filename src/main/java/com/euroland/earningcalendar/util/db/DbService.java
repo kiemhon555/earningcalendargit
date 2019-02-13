@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.EarningCalendarApplication;
-import com.euroland.earningcalendar.model.data.CrawlingResult;
-import com.euroland.earningcalendar.model.data.HeaderValue;
+import com.euroland.earningcalendar.domain.model.CrawlingResult;
+import com.euroland.earningcalendar.domain.model.HeaderValue;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;

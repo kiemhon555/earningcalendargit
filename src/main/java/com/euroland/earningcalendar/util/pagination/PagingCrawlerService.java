@@ -5,8 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.model.ElementBtn;
-import com.euroland.earningcalendar.model.PageConfig;
+import com.euroland.earningcalendar.model.source.ElementBtn;
+import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.service.LauncherService;
 
 @Service("default")
