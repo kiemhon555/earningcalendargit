@@ -30,12 +30,14 @@ public class DateMatcherService {
 	final String DATE_CONFIG_FILE = ".\\src\\main\\resources\\date\\date_conf.json";
 	
 	
-	final static String DEFAULT_DATE_FORMAT_1 = "yyyy-MM-dd";
+	public final static String DEFAULT_DATE_FORMAT_1 = "yyyy-MM-dd";
 	final static String DEFAULT_DATE_FORMAT_2 = "yy-MM-dd";
 	final static String DEFAULT_PATTERN = "pattern-0"; // yyyy=MM-dd
 	
 	final static String REGEX_DELIMITER = "['-/ ]+";
 	final static String DELIMITER = " ";
+	
+	public final static String NO_MATCH_IDENTIFIER = "No Match";
 	
 	public static Map<String, List<String>> moList = new HashMap<>();
 	public static Map<String, String> patternList = new HashMap<>();
@@ -45,7 +47,7 @@ public class DateMatcherService {
 		
 		String modifiedDate = "";
 		
-		String dateChanged = "No Match";
+		String dateChanged = NO_MATCH_IDENTIFIER;
 		DateTimeFormatter formatter = null;
 		
 		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER).toLowerCase();
@@ -85,7 +87,7 @@ public class DateMatcherService {
 			dateChanged = desiredDate.toString();
 		}
 		
-		if (!dateChanged.equals("No Match")) {
+		if (!dateChanged.equals(NO_MATCH_IDENTIFIER)) {
 			formatter = DateTimeFormatter.ofPattern(f, Locale.ENGLISH);
 			try {
 				LocalDate ld = LocalDate.parse(dateChanged, formatter);
@@ -110,16 +112,16 @@ public class DateMatcherService {
 		return status;
 	}
 	
-	private static String modify(String mod) {
+	public static String modify(String mod) {
 		
 		if(isNumeric(mod) > 9) {
 			return mod;
 		}
 		
-		String m = "No Match";
+		String m = NO_MATCH_IDENTIFIER;
 		
 		List<Entry<String, List<String>>> e = moList.entrySet().stream().filter( l -> 
-			l.getValue().contains(mod)
+			l.getValue().contains(mod.toLowerCase())
 		).collect(Collectors.toList());
 		
 		if(e.size() != 0) {

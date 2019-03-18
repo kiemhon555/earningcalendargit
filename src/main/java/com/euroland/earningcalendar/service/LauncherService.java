@@ -1,5 +1,7 @@
 package com.euroland.earningcalendar.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.domain.model.HeaderValue;
+import com.euroland.earningcalendar.model.source.ElementBtn;
 import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.rabbit.Producer;
@@ -15,6 +18,7 @@ import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.db.DbService;
+import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
 @Service
 public class LauncherService {
@@ -66,26 +70,32 @@ public class LauncherService {
 		if(config == null) {
 			return status;
 		}
-		
+
 		String page = config.getWebsite();
 		
+		if(config.getWebsite().contains(PagingCrawlerService.INDEX_MARKER)) {
+			LocalDate ld = LocalDate.now();
+			ElementBtn btn = config.getPagination().stream()
+					  .filter(e -> PagingCrawlerService.NAV_URL_IDENTIFIER.equals(e.getName().toLowerCase()))
+					  .findAny().orElse(null);
+			if (btn != null) {
+				String date = ld.format(DateTimeFormatter.ofPattern(btn.getSelector()));
+				page = config.getWebsite().replace(PagingCrawlerService.INDEX_MARKER, date);
+			}
+		}
+		
 		// Will Read The website on Config and load it
-		driver.get(page);
+		status = seleniumHandler.pageChange(driver, page);
 		
 		if (config.getIframe() != null) { // If dont have an Iframe value in config it will just load the website
 			page = seleniumService.attributeOut(driver, config.getIframe(), "cssSelector", "src");
-			driver.get(page);
+			status = seleniumHandler.pageChange(driver, page);
 		}
 		
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} // 10 sec wait time for popup
-		
-		pageNavigation(driver, config);
-		
+		if(status) {
+			pageNavigation(driver, config);
+		}
+
 		if(dataCrawlerService.getCrawledData().size() != 0) {
 			status = true;
 		}
@@ -114,16 +124,20 @@ public class LauncherService {
 
 		System.out.println("Sending to Rabbit ...");
 		
-		status = prepareResult(sourceId, data);
-
-		if (status) {
-			System.out.println("Sent to Rabbit: " + data.size() + " Data");
+		if(data.size() != 0) {
+			status = prepareSendingResult(sourceId, data);
+	
+			if (status) {
+				System.out.println("Sent to Rabbit: " + data.size() + " Data");
+			}
+		} else {
+			System.out.println("No Data Sent");
 		}
 		
 		return status;
 	}
 	
-	private boolean prepareResult(int sourceId,List<List<HeaderValue>> headerValue) {
+	private boolean prepareSendingResult(int sourceId,List<List<HeaderValue>> headerValue) {
 		
 		boolean status = producer.produce(new CrawlingResult(sourceId, headerValue));
 		

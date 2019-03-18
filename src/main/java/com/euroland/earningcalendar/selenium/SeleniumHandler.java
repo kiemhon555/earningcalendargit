@@ -9,7 +9,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ public class SeleniumHandler {
 		}
 	}
 
-	public boolean webElementClick(WebDriver driver, WebElement wbl) {
+	public boolean webElementClick(WebDriver driver, WebElement wbl, int delay) {
 		boolean ret = true;
 
 		try {
@@ -62,7 +61,7 @@ public class SeleniumHandler {
 		} finally {
 
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(delay);
 			} catch (InterruptedException e) {
 				
 			}
@@ -76,7 +75,7 @@ public class SeleniumHandler {
 	 *
 	 * @param Webdriver
 	 */
-	public boolean pageChangeWithScrollDown(WebDriver driver, String link) throws InterruptedException {
+	public boolean pageChange(WebDriver driver, String link) {
 		try {
 			connectionManager.ConnectOnlyWhenOnline();
 			System.out.println(link);
@@ -88,20 +87,26 @@ public class SeleniumHandler {
 
 			}
 
-			try {
-				driver.manage().deleteAllCookies();
-
-				driver.get(link);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				driver.navigate().refresh();
+			boolean status = true;
+			int retry = 1;
+			while (status && retry != 3) {
+				try {
+					driver.manage().deleteAllCookies();
+	
+					driver.get(link);
+					status = driver.getPageSource().contains("<head></head><body></body></html>");
+					
+					if(status) {
+						Thread.sleep(1000);
+						retry++;
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					driver.navigate().refresh();
+				}
 			}
-			Thread.sleep(2000);
-			scrolldown(driver);
-
-			Actions action = new Actions(driver);
-			action.sendKeys(Keys.ESCAPE);
+			Thread.sleep(10000);
 
 			return true;
 		} catch (Exception e) {
@@ -109,6 +114,8 @@ public class SeleniumHandler {
 		}
 	}
 
+	
+	
 	/**
 	 * Try closing popup window
 	 *

@@ -1,6 +1,7 @@
 package com.euroland.earningcalendar.util.matcher;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +24,13 @@ public class EventMatcherService {
 	final String EVENT_CONFIG_FILE = ".\\src\\main\\resources\\event\\event_conf.json";
 	final static String LOCALE_CODE = "utf-8";
 	
-	public static Map<String, List<String>> eventList = new HashMap<>();
+	final static String FIRST_PRIORITY_IDENTIFIER = "(First) ";
+	final static String LAST_PRIORITY_IDENTIFIER = "(Last) ";
+	final static String EMPTY_STRING = "";
+	
+	public static TreeMap<String, List<String>> eventList = new TreeMap<>(Collections.reverseOrder());
+	public static TreeMap<String, List<String>> firstEventList = new TreeMap<>();
+	public static TreeMap<String, List<String>> lastEventList = new TreeMap<>();
 	
 	public static String getEvent(String event) {
 
@@ -32,10 +39,25 @@ public class EventMatcherService {
 		String trans = event.toLowerCase(Locale.forLanguageTag(LOCALE_CODE));
 		
 		// Search for the event translation in the config
-		List<Entry<String, List<String>>> e = eventList.entrySet().stream().filter( l -> 
-			l.getValue().stream().map(s -> s = "(?:.*)" + s + "(?:.*)").collect(Collectors.toList())
-			.stream().anyMatch(trans::matches)
-		).collect(Collectors.toList());
+		List<Entry<String, List<String>>> e = new ArrayList<Map.Entry<String,List<String>>>();
+		
+		if(firstEventList.size() != 0) {
+			e = firstEventList.entrySet().stream().filter( l -> 
+				l.getValue().stream().anyMatch(trans::matches)
+			).collect(Collectors.toList());
+		}
+		
+		if(eventList.size() != 0 && e.size() == 0) {
+			e = eventList.entrySet().stream().filter( l -> 
+				l.getValue().stream().anyMatch(trans::matches)
+			).collect(Collectors.toList());
+		}
+		
+		if (lastEventList.size() != 0 && e.size() == 0) {
+			e = lastEventList.entrySet().stream().filter( l -> 
+				l.getValue().stream().anyMatch(trans::matches)
+			).collect(Collectors.toList());
+		}
 		
 		if(e.size() != 0) {
 			// If there is a match
@@ -50,7 +72,26 @@ public class EventMatcherService {
 		
 		EventConfig ec = (EventConfig) confService.prepareTestConf(path, new EventConfig());
 		if(ec != null) {
-			eventList = new TreeMap<String, List<String>>(ec.getEventTranslations()).descendingMap();
+			eventList.putAll(ec.getEventTranslations().entrySet().stream()
+						.collect(Collectors.toMap(Map.Entry::getKey, 
+								l -> l.getValue().stream()
+									.map(s -> s = "(?:.*)" + s + "(?:.*)")
+									.collect(Collectors.toList())
+						))
+					);
+			
+			firstEventList.putAll(eventList.entrySet().stream()
+					.filter(l -> l.getKey().contains(FIRST_PRIORITY_IDENTIFIER))
+					.collect(Collectors.toMap(
+							 k -> k.getKey().replace(FIRST_PRIORITY_IDENTIFIER, EMPTY_STRING), Map.Entry::getValue)));
+			eventList.entrySet().removeIf(k -> k.getKey().contains(FIRST_PRIORITY_IDENTIFIER));
+			
+			lastEventList.putAll(eventList.entrySet().stream()
+					.filter(l -> l.getKey().contains(LAST_PRIORITY_IDENTIFIER))
+					.collect(Collectors.toMap(
+							k -> k.getKey().replace(LAST_PRIORITY_IDENTIFIER, EMPTY_STRING), Map.Entry::getValue)));
+			eventList.entrySet().removeIf(k -> k.getKey().contains(LAST_PRIORITY_IDENTIFIER));
+			
 			status = true;
 		}
 		return status;

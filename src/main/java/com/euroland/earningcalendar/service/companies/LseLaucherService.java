@@ -22,7 +22,7 @@ public class LseLaucherService extends PagingCrawlerService {
 			seleniumHandler.webElementClick(driver, 
 					seleniumService.webElementOut(driver, 
 						eb.get(0).getSelector(), 
-						eb.get(0).getSelectorType()));
+						eb.get(0).getSelectorType()), 3000);
 			
 			for (int ctr = 0; ctr < Integer.parseInt(eb.get(1).getClicks()); ctr ++) {
 				if (ctr != 0) {
@@ -36,13 +36,13 @@ public class LseLaucherService extends PagingCrawlerService {
 					seleniumHandler.webElementClick(driver, 
 							seleniumService.webElementOut(driver, 
 								eb.get(1).getSelector(), 
-								eb.get(1).getSelectorType()));
+								eb.get(1).getSelectorType()), 3000);
 
 					//  Clicking last day of the month
 					seleniumHandler.webElementClick(driver, 
 							seleniumService.webElementOut(driver, 
 								eb.get(2).getSelector(), 
-								eb.get(2).getSelectorType()));
+								eb.get(2).getSelectorType()), 3000);
 					
 					// Return to default page
 					driver.switchTo().defaultContent();

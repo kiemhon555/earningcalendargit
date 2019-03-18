@@ -6,6 +6,7 @@ import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
@@ -16,8 +17,11 @@ public class Producer {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
-	private static final String EXCHANGE = "crawler.exchange";
-	private static final String ROUTING_KEY = "crawler_routing_key";
+	@Value(value = "${crawler.rabbit.exchange}")
+	private String EXCHANGE;
+
+	@Value(value = "${crawler.rabbit.routingkey}")
+	private String ROUTING_KEY;
 
 	public boolean produce(CrawlingResult crawlingResult) {
 		

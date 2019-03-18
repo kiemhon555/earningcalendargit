@@ -41,7 +41,7 @@ public class SeleniumService {
 		System.out.println(CHROME_DRIVER_LOCATION);
 		System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_LOCATION);
 		List<String> amenst = new ArrayList<>();
-		// amenst.add("headless");
+		amenst.add("headless");
 		amenst.add("window-size=3360x1890");
 		amenst.add("--allow-insecure-localhost");
 		amenst.add("--window-size=3360,1890");
@@ -50,9 +50,11 @@ public class SeleniumService {
 		amenst.add("--enable-link-disambiguation-popup");
 		amenst.add("--no-sandbox");
 		amenst.add("--disable-dev-shm-usage");
+		amenst.add("--disable-notifications");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(amenst);
+//		options.addExtensions(new File(".\\src\\main\\resources\\avira.crx"));
 		WebDriver driver = new ChromeDriver(options);
 		TimeUnit.SECONDS.sleep(5);
 		driver.manage().window().maximize();
@@ -88,7 +90,9 @@ public class SeleniumService {
 
 	public WebElement webElementOut(WebElement driver, String element, String elmType) {
 		WebElement ret = null;
+		
 		try {
+			
 			if (elmType.equals("cssSelector")) {
 				element.trim().replace(" ", ".");
 				ret = driver.findElement(By.cssSelector(element));
@@ -109,8 +113,9 @@ public class SeleniumService {
 				ret = driver.findElement(By.tagName(element));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			ret = null;
 		}
+
 		return ret;
 	}
 

@@ -1,25 +1,44 @@
 package com.euroland.earningcalendar.util.pagination;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.source.ElementBtn;
 import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.service.LauncherService;
+import com.euroland.earningcalendar.util.popup.PopupHandler;
 
 @Service("default")
 public class PagingCrawlerService extends LauncherService{
 
 	// Index Marker is used for determining where will be the iteration in the selector
-	private static final String INDEX_MARKER = "(euroland)";
+	public static final String INDEX_MARKER = "(euroland)";
 	
 	// To identify if need to click the button before recursion/load data
 	private static final String FULL_CLICK_IDENTIFIER = "click all";
 
 	// To identify if the button is a drop down type
 	private static final String DROPDOWN_IDENTIFIER = "dropdown";
+	
+	// To identify if the button is on a dialog
+	private static final String DIALOG_IDENTIFIER = "dialog";
+
+	// To identify if the button is a PopUp
+	private static final String POPUP_IDENTIFIER = "popup";
+	
+	// To identify if the button is for navigating the url
+    public static final String NAV_URL_IDENTIFIER = "navigate url";
+	
+	@Autowired
+	protected PopupHandler popupHandler;
 	
 	@Override
 	protected void pageNavigation(WebDriver driver, PageConfig config) {
@@ -55,6 +74,10 @@ public class PagingCrawlerService extends LauncherService{
 			// value != if constant
 			int no = isNumeric(btn.getClicks());
 			
+			int incrementation = 1;
+			if(btn.getIncrementation() != 0) {
+				incrementation = btn.getIncrementation();
+			}
 			
 			// note that the for loop is looping constantly wether what happen to the button click
 			// while the while loop will loop until the button fail to click
@@ -66,35 +89,60 @@ public class PagingCrawlerService extends LauncherService{
 				// will get the index on config to now if the button incrementation is where to start
 				// also will get the incrementation on config to modify the incrementation needed
 				for (int ctr = btn.getIndex(); 
-						ctr < no; ctr = ctr + btn.getIncrementation()) {
+						ctr < no; ctr = ctr + incrementation) {
 
+					
+					
 					String st = btn.getSelector(); // get the selector on config
 					
-					if(st.contains(INDEX_MARKER)) {
-						// if it has a Index Marker it will modify the iteration base on the config
-						st = st.replace(INDEX_MARKER, Integer.toString(ctr));
-					}
-					
+
 					// This will check if the button is need to be clicked on load or not
 					if (clickOnLoad) {
 						
-						// Get button element
-						WebElement we = seleniumService.webElementOut(
-								driver, st, btn.getSelectorType());
-						
-						if(!checkNullOrDisable(we) && !btn.getName().toLowerCase().contains("popup"))
-							continue;
-
-						String dd = btn.getName();
-						if(dd.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
+						if(btn.getName().toLowerCase().equals(NAV_URL_IDENTIFIER)) {
+							String d = "";
+							Pattern p = Pattern.compile(btn.getSelectorType());
+							Matcher m = p.matcher(driver.getCurrentUrl());
+	
+							if(m.find()) {
+							    d = m.group(1);
+								LocalDate ld = LocalDate.parse(d, DateTimeFormatter.ofPattern(st)).plusDays(1);
+								String page = config.getWebsite().replace(INDEX_MARKER, 
+										ld.format(DateTimeFormatter.ofPattern(st))).toString();
+								seleniumHandler.pageChange(driver, page);
+							}
 							
-							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])));
+						} else {
+							// if it has a Index Marker it will modify the iteration base on the config
+							if(st.contains(INDEX_MARKER)) {
+								st = st.replace(INDEX_MARKER, Integer.toString(ctr));
+							}
+							
+							// Get button element
+							WebElement we = seleniumService.webElementOut(
+									driver, st, btn.getSelectorType());
+							
+							if(btn.getName().toLowerCase().contains(POPUP_IDENTIFIER)) {
+								popupHandler.checkPopup(driver, btn);
+							} else {
+
+								if(!checkNullOrDisable(we) && !btn.getName().toLowerCase().contains(DIALOG_IDENTIFIER))
+									continue;
+		
+								String dd = btn.getName();
+								if(dd.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
+									
+									seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])), 3000);
+								}
+								
+								boolean status = seleniumHandler.webElementClick(driver, we, 3000);
+//								new Actions(driver).moveToElement(we).click().perform();
+								if((!status) && !btn.getName().toLowerCase().contains(DIALOG_IDENTIFIER)) { // the loop will continue until its on the limit
+									continue;
+								}
+							}
 						}
 						
-						boolean status = seleniumHandler.webElementClick(driver, we);
-						if((!status && !btn.getName().toLowerCase().contains("popup"))) { // the loop will continue until its on the limit
-							continue;
-						}
 						
 					} else {
 						// will set true so that it will now click button after load
@@ -141,17 +189,17 @@ public class PagingCrawlerService extends LauncherService{
 						String dd = btn.getName();
 						if(dd.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
 							
-							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])));
+							seleniumHandler.webElementClick(driver, we.findElement(By.xpath(dd.split(" ")[1])), 3000);
 						}
 						
 						if(status) {
 							
-							status = seleniumHandler.webElementClick(driver, we);
+							status = seleniumHandler.webElementClick(driver, we, 3000);
 							if((!status)) { // the loop will stop once the button cant click anymore
 								status = false;
 							}
 							
-							ctr = ctr + btn.getIncrementation(); // process the incrementation of the ctr
+							ctr = ctr + incrementation; // process the incrementation of the ctr
 						}
 
 					} else {

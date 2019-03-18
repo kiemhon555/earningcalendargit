@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.service.companies.BenzingaLaucherService;
-import com.euroland.earningcalendar.service.companies.CnbcLaucherService;
 import com.euroland.earningcalendar.service.companies.LseLaucherService;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
@@ -25,10 +24,6 @@ public class CrawlBeanFactory {
 	@Qualifier("benzinga")
 	private BenzingaLaucherService benzingaLaucherService;
 	
-	@Autowired
-	@Qualifier("cnbc")
-	private CnbcLaucherService cnbcLaucherService;
-		
 	public CrawlBeanFactory() {
 		super();
 	}
@@ -41,9 +36,6 @@ public class CrawlBeanFactory {
 			break;
 		case "benzinga":
 			benzingaLaucherService.appRunner(sourceConfig);
-			break;
-		case "cnbc":
-			cnbcLaucherService.appRunner(sourceConfig);
 			break;
 		default:
 			pagingCrawlerService.appRunner(sourceConfig);

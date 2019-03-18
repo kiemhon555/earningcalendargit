@@ -1,10 +1,14 @@
 package com.euroland.earningcalendar.util.data;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,18 +36,25 @@ public class DataCrawlerService {
 	public static final String EVENT = "Event";
 
 	private static final String REGEX_IDENTIFIER = "regex: ";
+	private static final String DEFAULT_IDENTIFIER = "default: ";
 
 	private static final String CONCAT_IDENTIFIER = " concat: ";
 
 	private static final String SELECTOR_IDENTIFIER = "([\\:\\/\\\">\\[\\]])";
+	
+	private static final String JOIN_IDENTIFIER = ":join:";
 
 	private WebDriver webDriver = null;
+	
+	private String year;
 	
 	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
 	
 	public void dataLoader(WebDriver driver, PageConfig config) {
 		
 		webDriver = driver;
+		
+		year = null;
 		
 		config.getCrawlingSections().stream().forEach( c -> {
 			
@@ -67,12 +78,17 @@ public class DataCrawlerService {
 	private void loadData(CrawlingSection cs, String standardDate) {
 		
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		if(cs.getModifyElement() != null) {
+			if (cs.getModifyElement().getType().equals("perLoad")) {
+				modifyPerLoad(cs.getModifyElement());
+			}
+		}
 
 		List<WebElement> wl = seleniumService.webElementsOut(
 				webDriver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
@@ -80,6 +96,12 @@ public class DataCrawlerService {
 		wl.stream().forEach( w -> {
 			
 			List<HeaderValue> headerValue =  new ArrayList<>();
+			
+			if(cs.getModifyElement() != null) {
+				if (cs.getModifyElement().getType().equals("perData")) {
+					modifyPerData(w, cs.getModifyElement());
+				}
+			}
 			
 			if(cs.getDateDetails() != null) {
 				// index 0 has the original date
@@ -106,12 +128,73 @@ public class DataCrawlerService {
 			headerValue.addAll(loadBasicDetails(cs.getBasicDetails(), w));
 			
 			System.out.println("===============================");
-			headerValueList.add(headerValue);
+			
+			boolean status = checkData(headerValue);
+			if(status) {
+				headerValueList.add(headerValue);
+			}
 		});
 		
 		System.out.println("unprocessed data: " + headerValueList.size());
 	}
 	
+	private void modifyPerLoad(ElementData ed) {
+		WebElement we = seleniumService.webElementOut(webDriver, 
+				ed.getSelector(), 
+				ed.getSelectorType());
+		if(we != null) {
+			((JavascriptExecutor)webDriver).executeScript(
+					"arguments[0].setAttribute(arguments[1], arguments[2]);", 
+					we, ed.getRef(), ed.getName());
+		}
+	}
+	
+	private void modifyPerData(WebElement w, ElementData ed) {
+		WebElement we = seleniumService.webElementOut(w, 
+				ed.getSelector(), 
+				ed.getSelectorType());
+
+		if(we != null) {
+			((JavascriptExecutor)webDriver).executeScript(
+					"arguments[0].setAttribute(arguments[1], arguments[2]);", 
+					we, ed.getRef(), ed.getName());
+		}
+	}
+	
+	private boolean checkData(List<HeaderValue> headerValue) {
+		
+		boolean status = true;
+		
+		HeaderValue date = headerValue.stream()
+					.filter(e -> "Original Date".equals(e.getHeader())).findAny().orElse(null);
+		
+		HeaderValue event = headerValue.stream()
+				  	.filter(e -> "Original Event".equals(e.getHeader())).findAny().orElse(null);
+		
+		if(date != null || event != null) {
+			String dateValue = "";
+			String eventValue ="";
+			
+			if (date != null) {
+				dateValue = date.getValue();
+			}
+			
+			if(event != null) {
+				eventValue = event.getValue();
+			}
+			
+			if(dateValue.equals("") && eventValue.equals("")) {
+				status = false;
+			}
+			
+		} else {
+			status = false;
+		}
+		
+		
+		return status;
+	}
+
 	public List<HeaderValue> loadBasicDetails(List<ElementData> listBasicDetails, WebElement w) {
 		List<HeaderValue> headerValue =  new ArrayList<>();
 		
@@ -137,10 +220,6 @@ public class DataCrawlerService {
 				value = isSplit(value, b.getSplitter(), b.getPosition());
 			} else {
 				value = urltextOrAttribute(w, b);
-			}
-			
-			if(header.toLowerCase().equals("symbol")) {
-				value = value.replaceAll("%20", " ");
 			}
 			
 			// if there is a event
@@ -179,11 +258,46 @@ public class DataCrawlerService {
 			pattern = details.getDatePattern();
 			
 		} else {
-			String year = urltextOrAttribute(we, details.getSplitDate().get(0));
-			String month = urltextOrAttribute(we, details.getSplitDate().get(1));
-			String day = urltextOrAttribute(we, details.getSplitDate().get(2));
 			
-			date = year + "-" + month + "-" + day;
+			if(year == null) {
+				year = urltextOrAttribute(we, details.getSplitDate().stream()
+				  .filter(e -> "year".equals(e.getName().toLowerCase())).findAny().orElse(null));
+			}
+			
+			String month = urltextOrAttribute(we, details.getSplitDate().stream()
+					  .filter(e -> "month".equals(e.getName().toLowerCase())).findAny().orElse(null));
+			
+			String day = urltextOrAttribute(we, details.getSplitDate().stream()
+					  .filter(e -> "day".equals(e.getName().toLowerCase())).findAny().orElse(null));
+			
+			if(year.equals("")) {
+				year = String.valueOf(LocalDate.now().getYear());
+			}
+			
+			String previousDay = urltextOrAttribute(we, details.getSplitDate().stream()
+					  .filter(e -> "previous day".equals(e.getName().toLowerCase())).findAny().orElse(null));
+			
+			String previousMonth = urltextOrAttribute(we, details.getSplitDate().stream()
+					  .filter(e -> "previous month".equals(e.getName().toLowerCase())).findAny().orElse(null));
+
+			String modMonth = DateMatcherService.modify(month);
+			String modPreviousMonth = DateMatcherService.modify(previousMonth);
+			
+			date = year + "-" + modMonth + "-" + DateMatcherService.modify(day);
+			
+			if(date.contains(DateMatcherService.NO_MATCH_IDENTIFIER)) {
+				date = "";
+			} else {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateMatcherService.DEFAULT_DATE_FORMAT_1, Locale.ENGLISH);
+				LocalDate ld = LocalDate.parse(date, formatter);
+				
+				if(!previousDay.equals("") && (Integer.parseInt(day) < Integer.parseInt(previousDay))) {
+					date = ld.plusMonths(1).format(formatter).toString();	
+				} else if(!previousMonth.equals("") && (Integer.parseInt(modMonth) < Integer.parseInt(modPreviousMonth))) {
+					date = ld.plusYears(1).format(formatter).toString();	
+					year = Integer.toString(ld.plusYears(1).getYear());
+				}
+			}
 		}
 		
 		// adding original date
@@ -203,12 +317,16 @@ public class DataCrawlerService {
 		
 		String result = "";
 		
+		if(ed == null) {
+			return result;
+		}
+		
 		if(ed.getSelectorType() == null && (ed.getType() == null || !ed.getType().equals(URL_OUT))) {
 			return ed.getSelector();
 		}
 		
 		if(ed.getType().equals(URL_OUT)) {
-			result = webDriver.getCurrentUrl();
+			result = webDriver.getCurrentUrl().replaceAll("%20", " ");;
 		}
 		
 		if(ed.getType().contains(ATTRIBUTE_OUT)) {
@@ -219,15 +337,30 @@ public class DataCrawlerService {
 
 			if(ed.getSelector().contains(CONCAT_IDENTIFIER)) {
 				String[] selectors = ed.getSelector().split(CONCAT_IDENTIFIER);
-				for(String s : selectors) {
-					result = result + " " +textOrSelector(we, s, ed.getSelectorType()).trim();
+				
+				for(int ctr=0; ctr<selectors.length; ctr++) {
+					
+					result = result.trim();
+					
+					if(ed.getSplitter() != null && ed.getSplitter().contains(JOIN_IDENTIFIER)) {
+						String[] join = ed.getSplitter().split(JOIN_IDENTIFIER);
+						try {
+							result = result + " " + isSplit(textOrSelector(we, selectors[ctr], ed.getSelectorType()).trim(), join[ctr], ed.getPosition());
+						} catch (Exception e) {
+							result = result + " " + textOrSelector(we, selectors[ctr], ed.getSelectorType()).trim();
+						}
+					} else {
+						result = result + " " + textOrSelector(we, selectors[ctr], ed.getSelectorType()).trim();
+					}
 				}
 			} else {
 				result = seleniumService.textOut(we, ed.getSelector(), ed.getSelectorType());
 			}
 		}
 		
-		result = isSplit(result.trim(), ed.getSplitter(), ed.getPosition());
+		if(ed.getSplitter() == null || !ed.getSplitter().contains(JOIN_IDENTIFIER)) {
+			result = isSplit(result.trim(), ed.getSplitter(), ed.getPosition());
+		}
 		
 		return result;
 	}
@@ -258,12 +391,26 @@ public class DataCrawlerService {
 				if(text.contains(splitter)) {
 					result = text.split(splitter)[pos];
 				} else if (splitter.contains(REGEX_IDENTIFIER)) {
+					String split = "";
+					String def = "";
+					if(splitter.contains(DEFAULT_IDENTIFIER)) {
+						split = splitter.split(DEFAULT_IDENTIFIER)[1].split(REGEX_IDENTIFIER)[1];
+						def = splitter.split(DEFAULT_IDENTIFIER)[1].split(REGEX_IDENTIFIER)[0];
+					} else {
+						split = splitter.split(REGEX_IDENTIFIER)[1];
+					}
 					
-					Pattern p = Pattern.compile(splitter.split(REGEX_IDENTIFIER)[1]);
+					
+					
+					Pattern p = Pattern.compile(split);
 					Matcher m = p.matcher(text);
 
 					if(m.find()) {
 					    result = m.group(1);
+					} else if(!def.equals("")){
+						result = def;
+					} else {
+						result = "";
 					}
 				}
 			} catch (Exception e) {
