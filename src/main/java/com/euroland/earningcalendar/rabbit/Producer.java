@@ -6,22 +6,19 @@ import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
+import com.euroland.earningcalendar.util.configuration.ConfService;
 
 @Service
 public class Producer {
 	
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-
-	@Value(value = "${crawler.rabbit.exchange}")
-	private String EXCHANGE;
-
-	@Value(value = "${crawler.rabbit.routingkey}")
-	private String ROUTING_KEY;
+	
+	@Autowired
+	private ConfService confService;
 
 	public boolean produce(CrawlingResult crawlingResult) {
 		
@@ -35,7 +32,7 @@ public class Producer {
 		};
 
 		try {
-			rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, crawlingResult, mpp);
+			rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
 		} catch (Exception e) {
 			System.out.println("Failed to Send Data to Rabbit");
 			return false;

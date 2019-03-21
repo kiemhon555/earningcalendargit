@@ -42,25 +42,23 @@ public class LauncherService {
 		
 		boolean status = false;
 		
-		WebDriver driver = null;
+		WebDriver driver;
 		try {
 			driver = seleniumService.getDriver("");
-
-			// initialize crawled data list
-			dataCrawlerService.setCrawledData(null);
-			
-			status = pageLoader(driver, c.getConfigText());
-			
-			if(status) {
-				status = processResult(driver, c.getSourceId());
-			}
-			
 		} catch (InterruptedException e) {
 			return status;
-		} finally {
-			if (driver != null)
-				driver.close();
 		}
+		
+		// initialize crawled data list
+		dataCrawlerService.setCrawledData(null);
+		
+		status = pageLoader(driver, c.getConfigText());
+		
+		if(status) {
+			status = processResult(driver, c.getSourceId());
+		}
+		
+		driver.close();
 		
 		return status;
 	}

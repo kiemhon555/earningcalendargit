@@ -6,10 +6,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.euroland.earningcalendar.EarningCalendarApplication;
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.domain.model.HeaderValue;
 import com.euroland.earningcalendar.util.configuration.ConfService;
@@ -21,9 +19,6 @@ public class DbService {
 
 	@Autowired
 	ConfService confService;
-
-	@Value(value = "${crawler.previous.data}")
-	private String PREVIOUS_CRAWLED_DATA_LINK;
 	
 	public List<List<HeaderValue>> checkDuplicate(int sourceId, List<List<HeaderValue>> headerValue) {
 		List<List<HeaderValue>> result = null;
@@ -81,7 +76,7 @@ public class DbService {
 		
 		// getting previous data from db
 		CrawlingResult hvd = (CrawlingResult) confService.prepareTestConf(
-				EarningCalendarApplication.HOST + PREVIOUS_CRAWLED_DATA_LINK + Integer.toString(sourceId), new CrawlingResult());
+				confService.HOST + confService.PREV_CRAWLED_DATA_LINK + Integer.toString(sourceId), new CrawlingResult());
 		
 		if (hvd != null) {
 			ret = hvd.getResults();

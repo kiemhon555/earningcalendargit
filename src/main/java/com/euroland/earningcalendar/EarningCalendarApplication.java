@@ -3,10 +3,11 @@ package com.euroland.earningcalendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.euroland.earningcalendar.model.date.DateConfig;
@@ -18,8 +19,6 @@ import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.db.DbService;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.matcher.EventMatcherService;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 
 @SpringBootApplication
 @EnableAsync
@@ -42,18 +41,7 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	
 	@Autowired
 	DbService dbService;
-
-	public static String HOST;
 	
-	@Value(value = "${crawler.config.source}")
-	private String CONFIG_LINK;
-	
-	@Value(value = "${crawler.config.date}")
-	private String DATE_CONFIG_LINK;
-	
-	@Value(value = "${crawler.config.event}")
-	private String EVENT_CONFIG_LINK;
-
 	private static final String DEFAULT_CONFIG_FILE = ".\\src\\main\\resources\\companies\\page_conf.json";
 	
 	public static void main(String[] args) {
@@ -64,11 +52,6 @@ public class EarningCalendarApplication implements CommandLineRunner {
 		
 		return;
 	}
-
-	@Value("${crawler.host}")
-    public void setHost(String host) {
-        HOST = host;
-    }
 	
 	@Override
 	public void run(String... args) {
@@ -81,10 +64,11 @@ public class EarningCalendarApplication implements CommandLineRunner {
 
 			List<SourceConfig> wl = null;
 
-			String json = "";
 			try {
-				json = confService.readUrl(HOST + CONFIG_LINK);
-				wl = new Gson().fromJson(json, new TypeToken<List<SourceConfig>>(){}.getType());
+				// Load Sources that status are active
+				wl = confService.restTemplate.exchange(
+						confService.HOST + confService.CONFIG_LINK, HttpMethod.GET, null,
+						new ParameterizedTypeReference<List<SourceConfig>>() {}).getBody();
 			} catch (Exception e) {
 				System.out.println("Failed to Load Sources");
 				return;
@@ -112,9 +96,9 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	private boolean loadDateAndEventConfig() {
 		boolean status = false;
 		
-		status = dateMatcherService.loadDateConfig(HOST + DATE_CONFIG_LINK);
+		status = dateMatcherService.loadDateConfig(confService.HOST + confService.CONFIG_DATE_LINK);
 		if(status) {
-			status = eventMatcherService.loadEventConfig(HOST + EVENT_CONFIG_LINK);
+			status = eventMatcherService.loadEventConfig(confService.HOST + confService.CONFIG_EVENT_LINK);
 		}
 		
 		return status;
