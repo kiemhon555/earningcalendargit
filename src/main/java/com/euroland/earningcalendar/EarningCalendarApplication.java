@@ -2,6 +2,9 @@ package com.euroland.earningcalendar;
 
 import java.util.List;
 
+import org.apache.log4j.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +22,7 @@ import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.db.DbService;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.matcher.EventMatcherService;
+import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @SpringBootApplication
 @EnableAsync
@@ -44,6 +48,8 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	
 	private static final String DEFAULT_CONFIG_FILE = ".\\src\\main\\resources\\companies\\page_conf.json";
 	
+	private static final Logger logger = LoggerFactory.getLogger(EarningCalendarApplication.class);
+	
 	public static void main(String[] args) {
 		
 		SpringApplication.run(EarningCalendarApplication.class, args);
@@ -57,11 +63,12 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	public void run(String... args) {
 		boolean status = false;
 		
+		logger.info("Loading Configurations ...");
 		// Load Date and Event config from api
 		status = loadDateAndEventConfig();
 		
 		if (status) {
-
+			logger.info("Configurations Successfully Loaded");
 			List<SourceConfig> wl = null;
 
 			try {
@@ -70,22 +77,23 @@ public class EarningCalendarApplication implements CommandLineRunner {
 						confService.HOST + confService.CONFIG_LINK, HttpMethod.GET, null,
 						new ParameterizedTypeReference<List<SourceConfig>>() {}).getBody();
 			} catch (Exception e) {
-				System.out.println("Failed to Load Sources");
+				logger.error("Failed to Load Sources");
 				return;
 			}
 			
 			if (wl != null) {
 				
+				logger.info("Sources Successfully Loaded");
 				wl.stream().forEach( w -> {
 					// Loading of each source
 					// This condition is for demo purposes
-//					if(w.getSourceId() != 32)
+//					if(w.getSourceId() == 28)
 						crawlBeanFactory.getCrawl(w);
 					
 				});
 			}
 			
-//			// for resources location of page config
+			// for resources location of page config
 //			PageConfig pc = (PageConfig) confService.prepareTestConf(DEFAULT_CONFIG_FILE, new PageConfig());
 //			
 //			crawlBeanFactory.getCrawl(new SourceConfig(34, 1, "def", pc));
@@ -96,9 +104,16 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	private boolean loadDateAndEventConfig() {
 		boolean status = false;
 		
-		status = dateMatcherService.loadDateConfig(confService.HOST + confService.CONFIG_DATE_LINK);
-		if(status) {
-			status = eventMatcherService.loadEventConfig(confService.HOST + confService.CONFIG_EVENT_LINK);
+		while(!status) {
+			status = dateMatcherService.loadDateConfig(confService.HOST + confService.CONFIG_DATE_LINK);
+			
+			if(status)
+				status = eventMatcherService.loadEventConfig(confService.HOST + confService.CONFIG_EVENT_LINK);
+
+			if (!status)
+				logger.error("Failed to Load Configurations");
+			
+			ThreadHandler.sleep(10000);
 		}
 		
 		return status;

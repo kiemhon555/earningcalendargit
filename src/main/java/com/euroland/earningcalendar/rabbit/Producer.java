@@ -34,7 +34,6 @@ public class Producer {
 		try {
 			rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
 		} catch (Exception e) {
-			System.out.println("Failed to Send Data to Rabbit");
 			return false;
 		}
 		

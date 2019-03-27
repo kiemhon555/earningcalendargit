@@ -9,8 +9,12 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
 public class SeleniumHandler {
@@ -18,6 +22,8 @@ public class SeleniumHandler {
 	@Autowired
 	ConnectionManager connectionManager;
 
+	private static final Logger logger = LoggerFactory.getLogger(SeleniumHandler.class);
+	
 	public void scrolldown(WebDriver d) throws InterruptedException {
 		JavascriptExecutor jse = (JavascriptExecutor) d;
 		try {
@@ -38,33 +44,21 @@ public class SeleniumHandler {
 		boolean ret = true;
 
 		try {
-			
 			wbl.click();
-			
 		} catch (Exception e) {
-
 			try {
-				
 				wbl.sendKeys(Keys.LEFT_CONTROL);
 				wbl.click();
-
 			} catch (Exception e1) {
 				try {
-					
 					((JavascriptExecutor) driver).executeScript("window.scrollTo(document.body.scrollHeight,0)");
 					wbl.click();
-					
 				} catch (Exception e2) {
 					return false;
 				}
 			}
 		} finally {
-
-			try {
-				Thread.sleep(delay);
-			} catch (InterruptedException e) {
-				
-			}
+			ThreadHandler.sleep(delay);
 		}
 
 		return ret;
@@ -78,26 +72,28 @@ public class SeleniumHandler {
 	public boolean pageChange(WebDriver driver, String link) {
 		try {
 			connectionManager.ConnectOnlyWhenOnline();
-			System.out.println(link);
 			driver.navigate().refresh();
 			try {
 				driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-
 			} catch (Exception e1) {
 
 			}
 
 			boolean status = true;
 			int retry = 1;
-			while (status && retry != 3) {
+			while (status && retry != 4) {
 				try {
 					driver.manage().deleteAllCookies();
 	
+					logger.info("Loading Page: " + link);
 					driver.get(link);
+					// if true it means the page is empty and need to be reloaded. max retries is 3 times
 					status = driver.getPageSource().contains("<head></head><body></body></html>");
 					
 					if(status) {
-						Thread.sleep(1000);
+						logger.error("Page Not Loaded");
+						logger.error("Retries: " + retry);
+						Thread.sleep(5000);
 						retry++;
 					}
 				} catch (Exception e) {
@@ -106,16 +102,19 @@ public class SeleniumHandler {
 					driver.navigate().refresh();
 				}
 			}
-			Thread.sleep(10000);
-
+			
+			if(status) {
+				logger.error("Page Can't be Loaded");
+				return false;
+			}
+			
+			ThreadHandler.sleep(10000);
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	
-	
 	/**
 	 * Try closing popup window
 	 *

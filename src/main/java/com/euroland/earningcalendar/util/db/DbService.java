@@ -5,14 +5,16 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.domain.model.HeaderValue;
 import com.euroland.earningcalendar.util.configuration.ConfService;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class DbService {
@@ -20,19 +22,19 @@ public class DbService {
 	@Autowired
 	ConfService confService;
 	
+	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
+	
 	public List<List<HeaderValue>> checkDuplicate(int sourceId, List<List<HeaderValue>> headerValue) {
 		List<List<HeaderValue>> result = null;
 		
 		List<List<HeaderValue>> dbData = getPreviousDataFromDB(sourceId);
 
 		if(dbData != null) {
-			System.out.println("Previous Data: " + dbData.size());
+			logger.info("Previous Data: " + dbData.size());
 			result = distinctData(dbData, getDistinctNewData(headerValue));
 			
 		} else {
-			
 			result = getDistinctNewData(headerValue);
-			
 		}
 		
 		return result;
@@ -59,7 +61,6 @@ public class DbService {
 			}
 
 			if (addToDb) {
-
 				ret.add(lio);
 			}
 		}
@@ -98,7 +99,7 @@ public class DbService {
 			result.add(new Gson().fromJson(s, new TypeToken<List<HeaderValue>>() {}.getType()));
 		});
 		
-		System.out.println("Distinct Data: " + result.size());
+		logger.info("Distinct Data: " + result.size());
 		
 		return result;
 	}

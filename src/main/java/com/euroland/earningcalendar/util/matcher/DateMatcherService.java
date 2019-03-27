@@ -29,7 +29,6 @@ public class DateMatcherService {
 	
 	final String DATE_CONFIG_FILE = ".\\src\\main\\resources\\date\\date_conf.json";
 	
-	
 	public final static String DEFAULT_DATE_FORMAT_1 = "yyyy-MM-dd";
 	final static String DEFAULT_DATE_FORMAT_2 = "yy-MM-dd";
 	final static String DEFAULT_PATTERN = "pattern-0"; // yyyy=MM-dd

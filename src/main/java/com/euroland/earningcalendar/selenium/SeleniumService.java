@@ -14,6 +14,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ public class SeleniumService {
 	@Value(value = "${chrome.driver.location}")
 	private String CHROME_DRIVER_LOCATION;
 
+	private static final Logger logger = LoggerFactory.getLogger(SeleniumService.class);
+	
 	public int verifyURLStatus(String URL) {
 		int statuscode = 200;
 		HttpClient client = HttpClientBuilder.create().build();
@@ -54,7 +58,6 @@ public class SeleniumService {
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(amenst);
-//		options.addExtensions(new File(".\\src\\main\\resources\\avira.crx"));
 		WebDriver driver = new ChromeDriver(options);
 		TimeUnit.SECONDS.sleep(5);
 		driver.manage().window().maximize();
@@ -112,7 +115,6 @@ public class SeleniumService {
 			if (elmType.equals("tagName"))
 				ret = driver.findElement(By.tagName(element));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			ret = null;
 		}
 
@@ -199,8 +201,7 @@ public class SeleniumService {
 			if (elmType.equals("tagName"))
 				ret = driver.findElement(By.tagName(element));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			// return null if error or no element found
 		}
 		return ret;
 	}
@@ -228,9 +229,7 @@ public class SeleniumService {
 			if (elmType.equals("tagName"))
 				ret = driver.findElements(By.tagName(element));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-			System.out.println("Element type not found");
+			logger.debug("Element type not found");
 		}
 		return ret;
 	}

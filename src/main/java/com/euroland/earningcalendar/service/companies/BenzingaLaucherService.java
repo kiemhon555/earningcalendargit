@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.source.ElementBtn;
@@ -13,6 +15,8 @@ import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 @Service("benzinga")
 public class BenzingaLaucherService extends PagingCrawlerService {
 	
+	private static final Logger logger = LoggerFactory.getLogger(BenzingaLaucherService.class);
+	
 	@Override
 	protected void pageNavigation(WebDriver driver, PageConfig config) {
 		
@@ -21,9 +25,12 @@ public class BenzingaLaucherService extends PagingCrawlerService {
 		List<ElementBtn> eb = config.getPagination();
 
 		// Close Popup
-		popupHandler.checkPopup(driver, eb.get(0));
+		threadHandler.checkPopup(driver, eb.get(0));
 	
 		for (int ctr=0; ctr < Integer.parseInt(eb.get(1).getClicks()); ctr++) {
+
+			logger.debug("Initialize Page Navigation");
+			logger.debug("Number Page Navigation: " + config.getPagination().size());
 			
 			// Open Calendar
 			seleniumHandler.webElementClick(driver, 

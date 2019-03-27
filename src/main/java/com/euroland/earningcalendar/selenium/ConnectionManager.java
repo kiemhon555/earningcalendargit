@@ -8,11 +8,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ConnectionManager {
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(ConnectionManager.class);
+	
 	boolean ConnectOnlyWhenOnline() {
 		int tries = 0;
 		int connectionWait = 2000;
@@ -22,7 +26,8 @@ public class ConnectionManager {
 
 		if (tryConnection == false) {
 			while (!tryConnection) {
-				System.out.println("ConnectOnlyWhenOnline is not available loop");
+				logger.error("ConnectOnlyWhenOnline is not available loop");
+				
 				tryConnection = ConnectionExists();
 				try {
 					Thread.sleep(connectionWait);
@@ -31,7 +36,7 @@ public class ConnectionManager {
 				}
 				tries++;
 				if (tries > 100) {
-					System.out.println("ConnectOnlyWhenOnline is not available loop BIG wait");
+					logger.error("ConnectOnlyWhenOnline is not available loop BIG wait");
 					connectionWait = 15000;
 				}
 			}

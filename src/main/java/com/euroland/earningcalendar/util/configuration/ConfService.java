@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,8 @@ public class ConfService {
 
 	@Autowired
 	public RestTemplate restTemplate;
+
+	private static final Logger logger = LoggerFactory.getLogger(ConfService.class);
 	
 	public Object prepareTestConf(String path, Object obj) {
 		
@@ -48,7 +52,7 @@ public class ConfService {
 			}
 		} catch (Exception e) {
 			
-			System.out.println("Failed Loading Config: " + obj.getClass());
+			logger.error("Failed Loading Config: " + obj.getClass());
 			
 			return null;
 		}

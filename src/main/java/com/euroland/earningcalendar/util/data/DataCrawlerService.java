@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.matcher.EventMatcherService;
+import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
 public class DataCrawlerService {
@@ -48,7 +51,11 @@ public class DataCrawlerService {
 	
 	private String year;
 	
+	private String rowData;
+	
 	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
+	
+	private static final Logger logger = LoggerFactory.getLogger(DataCrawlerService.class);
 	
 	public void dataLoader(WebDriver driver, PageConfig config) {
 		
@@ -57,7 +64,6 @@ public class DataCrawlerService {
 		year = null;
 		
 		config.getCrawlingSections().stream().forEach( c -> {
-			
 			loadData(c, config.getStandardDate());
 		});
 		
@@ -77,11 +83,7 @@ public class DataCrawlerService {
 	
 	private void loadData(CrawlingSection cs, String standardDate) {
 		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		ThreadHandler.sleep(5000);
 		
 		if(cs.getModifyElement() != null) {
 			if (cs.getModifyElement().getType().equals("perLoad")) {
@@ -93,48 +95,71 @@ public class DataCrawlerService {
 				webDriver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
 
 		wl.stream().forEach( w -> {
+
+			rowData = "\n====================\n";
 			
-			List<HeaderValue> headerValue =  new ArrayList<>();
+			List<HeaderValue> headerValue = new ArrayList<>();
+			List<String> on = new ArrayList<>();
 			
-			if(cs.getModifyElement() != null) {
-				if (cs.getModifyElement().getType().equals("perData")) {
-					modifyPerData(w, cs.getModifyElement());
+			try {
+				if(cs.getModifyElement() != null) {
+					if (cs.getModifyElement().getType().equals("perData")) {
+						modifyPerData(w, cs.getModifyElement());
+					}
+				}
+				
+				if(cs.getDateDetails() != null) {
+					// index 0 has the original date
+					// index 1 has the modified date
+					on = getDateDetail(w, cs, standardDate);
+					
+					String header = cs.getDateDetails().getFullDate().getName();
+					
+					// Add Header Value for Original Date
+					headerValue.add(new HeaderValue(
+							ORIGINAL + header, 
+							on.get(0)));
+					
+					rowData = rowData + ORIGINAL + header + " --- " + on.get(0) + "\n";
+					
+					// Add Header Value of Modifed Date
+					headerValue.add(new HeaderValue(
+							header, 
+							on.get(1)));
+					
+					rowData = rowData + header + " --- " + on.get(1) + "\n";
+
+					List<HeaderValue> basicList = loadBasicDetails(cs.getBasicDetails(), w);
+					headerValue.addAll(basicList);
+					rowData = rowData + "====================";
+					logger.debug(rowData);
+				}
+				
+				
+			} catch (Exception e) {
+				if(on.size()>0) {
+					if(w.isDisplayed()) {
+						logger.error("Failed to Process Data Row: " + wl.indexOf(w)
+								+ " Date: " + on.get(0)
+								+ " Company: " + w.getText());
+					} else {
+						logger.error("Failed to Process Data Row: " + wl.indexOf(w)
+								+ " Date: " + on.get(0));
+					}
+				} else {
+					logger.error("Failed to Process Data Row: " + wl.indexOf(w));
 				}
 			}
-			
-			if(cs.getDateDetails() != null) {
-				// index 0 has the original date
-				// index 1 has the modified date
-				List<String> on = new ArrayList<>();
-				on = getDateDetail(w, cs, standardDate);
-				
-				String header = cs.getDateDetails().getFullDate().getName();
-				
-				// Add Header Value for Original Date
-				headerValue.add(new HeaderValue(
-						ORIGINAL + header, 
-						on.get(0)));
-				System.out.println(ORIGINAL + header + " --- " + on.get(0));
-				
-				// Add Header Value of Modifed Date
-				headerValue.add(new HeaderValue(
-						header, 
-						on.get(1)));
-				System.out.println(header + " --- " + on.get(1));
-
-			}
-			
-			headerValue.addAll(loadBasicDetails(cs.getBasicDetails(), w));
-			
-			System.out.println("===============================");
 			
 			boolean status = checkData(headerValue);
 			if(status) {
 				headerValueList.add(headerValue);
+			} else {
+				logger.error("Failed to Add Data: " + headerValue.toString());
 			}
 		});
 		
-		System.out.println("unprocessed data: " + headerValueList.size());
+		logger.info("Unprocessed Data: " + headerValueList.size());
 	}
 	
 	private void modifyPerLoad(ElementData ed) {
@@ -162,34 +187,28 @@ public class DataCrawlerService {
 	
 	private boolean checkData(List<HeaderValue> headerValue) {
 		
-		boolean status = true;
+		boolean status = false;
+		
+		if(headerValue.size() == 0)
+			return status;
 		
 		HeaderValue date = headerValue.stream()
 					.filter(e -> "Original Date".equals(e.getHeader())).findAny().orElse(null);
 		
-		HeaderValue event = headerValue.stream()
-				  	.filter(e -> "Original Event".equals(e.getHeader())).findAny().orElse(null);
-		
-		if(date != null || event != null) {
+		if(date != null) {
 			String dateValue = "";
-			String eventValue ="";
 			
 			if (date != null) {
 				dateValue = date.getValue();
 			}
 			
-			if(event != null) {
-				eventValue = event.getValue();
-			}
-			
-			if(dateValue.equals("") && eventValue.equals("")) {
-				status = false;
+			if(!dateValue.equals("")) {
+				status = true;
 			}
 			
 		} else {
 			status = false;
 		}
-		
 		
 		return status;
 	}
@@ -226,13 +245,14 @@ public class DataCrawlerService {
 				// Add Header Value for Original Event Name
 				header = ORIGINAL + EVENT;
 				headerValue.add(new HeaderValue(header, value));
-				System.out.println(header + " --- " + value);
+				rowData = rowData + header + " --- " + value + "\n";
 				
 				// Add Header Value for Modified Event Name
 				header = EVENT;
 				value = EventMatcherService.getEvent(value);
 			}
-			System.out.println(header + " --- " + value);
+
+			rowData = rowData + header + " --- " + value + "\n";
 			// Add Header Value for Basic Details
 			headerValue.add(new HeaderValue(header, value));
 		});
@@ -398,8 +418,6 @@ public class DataCrawlerService {
 					} else {
 						split = splitter.split(REGEX_IDENTIFIER)[1];
 					}
-					
-					
 					
 					Pattern p = Pattern.compile(split);
 					Matcher m = p.matcher(text);

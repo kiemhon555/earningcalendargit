@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,20 +40,23 @@ public class LauncherService {
 	@Autowired
 	private Producer producer;
 
+	private static final Logger logger = LoggerFactory.getLogger(LauncherService.class);
+	
 	public boolean appRunner(SourceConfig c) {
 		
 		boolean status = false;
 		
 		WebDriver driver = null;
 		try {
+			logger.info("Initialize Chrome Driver");
 			driver = seleniumService.getDriver("");
 
 			// initialize crawled data list
 			dataCrawlerService.setCrawledData(null);
 			
 			status = pageLoader(driver, c.getConfigText());
-			
 			if(status) {
+				logger.info("Processing Results");
 				status = processResult(driver, c.getSourceId());
 			}
 			
@@ -74,8 +79,7 @@ public class LauncherService {
 		}
 
 		String page = config.getWebsite();
-		
-		if(config.getWebsite().contains(PagingCrawlerService.INDEX_MARKER)) {
+		if(page.contains(PagingCrawlerService.INDEX_MARKER)) {
 			LocalDate ld = LocalDate.now();
 			ElementBtn btn = config.getPagination().stream()
 					  .filter(e -> PagingCrawlerService.NAV_URL_IDENTIFIER.equals(e.getName().toLowerCase()))
@@ -99,7 +103,11 @@ public class LauncherService {
 		}
 
 		if(dataCrawlerService.getCrawledData().size() != 0) {
+			logger.info("Processing Result ...");
 			status = true;
+		} else {
+			logger.info("No New Data Gathered");
+			status = false;
 		}
 		
 		return status;
@@ -108,6 +116,7 @@ public class LauncherService {
 	protected void pageNavigation(WebDriver driver, PageConfig config) {}
 	
 	protected void loadData(WebDriver driver, PageConfig config) {
+		logger.info("Load Data ...");
 		dataCrawlerService.dataLoader(driver, config);
 	}
 	
@@ -115,25 +124,19 @@ public class LauncherService {
 		
 		boolean status = false;
 		
-		if(dataCrawlerService.getCrawledData().size() == 0) {
-			System.out.println("No New Data Gathered");
-			return status;
-		}
-		
-		System.out.println("Filtering Duplicates ...");
+		logger.info("Filtering Duplicates ...");
 		
 		List<List<HeaderValue>> data = dbService.checkDuplicate(sourceId, dataCrawlerService.getCrawledData());
-
-		System.out.println("Sending to Rabbit ...");
 		
 		if(data.size() != 0) {
+			logger.info("Sending to Rabbit ...");
 			status = prepareSendingResult(sourceId, data);
 	
 			if (status) {
-				System.out.println("Sent to Rabbit: " + data.size() + " Data");
+				logger.info("Sent to Rabbit: " + data.size() + " Data");
 			}
 		} else {
-			System.out.println("No Data Sent");
+			logger.info("No Data Sent: " + sourceId);
 		}
 		
 		return status;

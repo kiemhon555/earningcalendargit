@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Built-By: michael
 Build-Jdk: 11.0.1
-Implementation-Title: spring-selenium-financial-calendar-v1.2
+Implementation-Title: earning-calendar-v1.6
 Implementation-Version: 0.0.1-SNAPSHOT
 Implementation-Vendor-Id: com.euroland.earningcalendar
 Implementation-URL: https://projects.spring.io/spring-boot/#/spring-boot
- -starter-parent/spring-selenium-financial-calendar-v1.2
+ -starter-parent/earning-calendar-v1.6
 Created-By: Maven Integration for Eclipse
 

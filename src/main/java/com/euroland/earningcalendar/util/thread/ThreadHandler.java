@@ -1,7 +1,9 @@
-package com.euroland.earningcalendar.util.popup;
+package com.euroland.earningcalendar.util.thread;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -11,13 +13,15 @@ import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 
 @Component
-public class PopupHandler {
+public class ThreadHandler {
 
 	@Autowired
 	SeleniumHandler seleniumHandler;
 	
 	@Autowired
 	SeleniumService seleniumService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(ThreadHandler.class);
 	
 	@Async
 	public void checkPopup(WebDriver driver, ElementBtn btn) {
@@ -35,12 +39,19 @@ public class PopupHandler {
 						driver.switchTo().defaultContent();
 					}
 				}
-//				System.out.println("popup thread: " + Thread.currentThread().getName());
 			}
 		} catch (Exception e) {
-			System.out.println("close popup thread: " + Thread.currentThread().getName());
+			logger.debug("Close Popup Thread: " + Thread.currentThread().getName());
 		}
 		
+	}
+	
+	public static void sleep(int s) {
+		try {
+			Thread.sleep(s);
+		} catch (InterruptedException e) {
+			logger.error("Failed to sleep: " + s + " ms");
+		}
 	}
 	
 }
