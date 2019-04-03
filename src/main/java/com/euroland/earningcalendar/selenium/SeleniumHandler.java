@@ -9,11 +9,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
@@ -22,8 +21,9 @@ public class SeleniumHandler {
 	@Autowired
 	ConnectionManager connectionManager;
 
-	private static final Logger logger = LoggerFactory.getLogger(SeleniumHandler.class);
-	
+	@Autowired
+	LoggerHandler logger;
+
 	public void scrolldown(WebDriver d) throws InterruptedException {
 		JavascriptExecutor jse = (JavascriptExecutor) d;
 		try {
@@ -98,7 +98,10 @@ public class SeleniumHandler {
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Page Not Loaded: " + e);
+					logger.error("Retries: " + retry);
+					Thread.sleep(5000);
+					retry++;
 					driver.navigate().refresh();
 				}
 			}

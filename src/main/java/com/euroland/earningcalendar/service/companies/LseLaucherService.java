@@ -4,18 +4,19 @@ import java.util.List;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.source.ElementBtn;
 import com.euroland.earningcalendar.model.source.PageConfig;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
 @Service("lse")
 public class LseLaucherService extends PagingCrawlerService {
 	
-	private static final Logger logger = LoggerFactory.getLogger(LseLaucherService.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	@Override
 	protected void pageNavigation(WebDriver driver, PageConfig config) {

@@ -7,14 +7,13 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.google.gson.Gson;
 
 @Service
@@ -38,7 +37,8 @@ public class ConfService {
 	@Autowired
 	public RestTemplate restTemplate;
 
-	private static final Logger logger = LoggerFactory.getLogger(ConfService.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	public Object prepareTestConf(String path, Object obj) {
 		

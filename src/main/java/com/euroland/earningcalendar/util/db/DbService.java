@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.domain.model.HeaderValue;
 import com.euroland.earningcalendar.util.configuration.ConfService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -22,7 +21,8 @@ public class DbService {
 	@Autowired
 	ConfService confService;
 	
-	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	public List<List<HeaderValue>> checkDuplicate(int sourceId, List<List<HeaderValue>> headerValue) {
 		List<List<HeaderValue>> result = null;

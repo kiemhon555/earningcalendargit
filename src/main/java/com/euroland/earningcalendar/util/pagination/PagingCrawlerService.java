@@ -8,14 +8,13 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.model.source.ElementBtn;
 import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.service.LauncherService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service("default")
@@ -38,8 +37,9 @@ public class PagingCrawlerService extends LauncherService{
 	
 	// To identify if the button is for navigating the url
     public static final String NAV_URL_IDENTIFIER = "navigate url";
-	
-    private static final Logger logger = LoggerFactory.getLogger(PagingCrawlerService.class);
+    
+    @Autowired
+    LoggerHandler logger;
     
 	@Autowired
 	protected ThreadHandler threadHandler;
@@ -193,7 +193,9 @@ public class PagingCrawlerService extends LauncherService{
 						status = false;
 					
 					if(button.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
-						seleniumHandler.webElementClick(driver, we.findElement(By.xpath(button.split(" ")[1])), 3000);
+						WebElement dd = seleniumService.webElementOut(driver, button.split(" ")[1], btn.getSelectorType());
+						if(dd != null)
+							seleniumHandler.webElementClick(driver, dd, 3000);
 					}
 					
 					if(status) {

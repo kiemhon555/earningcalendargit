@@ -11,8 +11,6 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +20,7 @@ import com.euroland.earningcalendar.model.source.CrawlingSection;
 import com.euroland.earningcalendar.model.source.ElementData;
 import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.matcher.EventMatcherService;
 import com.euroland.earningcalendar.util.thread.ThreadHandler;
@@ -31,7 +30,10 @@ public class DataCrawlerService {
 
 	@Autowired
 	SeleniumService seleniumService;
-	
+
+	@Autowired
+	LoggerHandler logger;
+
 	public static final String ATTRIBUTE_OUT = "attributeOut";
 	public static final String TXT_OUT = "txtOut";
 	public static final String URL_OUT = "urlOut";
@@ -54,8 +56,6 @@ public class DataCrawlerService {
 	private String rowData;
 	
 	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
-	
-	private static final Logger logger = LoggerFactory.getLogger(DataCrawlerService.class);
 	
 	public void dataLoader(WebDriver driver, PageConfig config) {
 		
@@ -83,83 +83,86 @@ public class DataCrawlerService {
 	
 	private void loadData(CrawlingSection cs, String standardDate) {
 		
-		ThreadHandler.sleep(5000);
+		ThreadHandler.sleep(3000);
 		
-		if(cs.getModifyElement() != null) {
-			if (cs.getModifyElement().getType().equals("perLoad")) {
-				modifyPerLoad(cs.getModifyElement());
+		try {
+		
+			if(cs.getModifyElement() != null) {
+				if (cs.getModifyElement().getType().equals("perLoad")) {
+					modifyPerLoad(cs.getModifyElement());
+				}
 			}
-		}
-
-		List<WebElement> wl = seleniumService.webElementsOut(
-				webDriver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
-
-		wl.stream().forEach( w -> {
-
-			rowData = "\n====================\n";
-			
-			List<HeaderValue> headerValue = new ArrayList<>();
-			List<String> on = new ArrayList<>();
-			
-			try {
-				if(cs.getModifyElement() != null) {
-					if (cs.getModifyElement().getType().equals("perData")) {
-						modifyPerData(w, cs.getModifyElement());
+	
+			List<WebElement> wl = seleniumService.webElementsOut(
+					webDriver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
+	
+			wl.stream().forEach( w -> {
+	
+				rowData = "\n====================\n";
+				
+				List<HeaderValue> headerValue = new ArrayList<>();
+				List<String> on = new ArrayList<>();
+				
+				try {
+					if(cs.getModifyElement() != null) {
+						if (cs.getModifyElement().getType().equals("perData")) {
+							modifyPerData(w, cs.getModifyElement());
+						}
 					}
-				}
-				
-				if(cs.getDateDetails() != null) {
-					// index 0 has the original date
-					// index 1 has the modified date
-					on = getDateDetail(w, cs, standardDate);
 					
-					String header = cs.getDateDetails().getFullDate().getName();
+					if(cs.getDateDetails() != null) {
+						// index 0 has the original date
+						// index 1 has the modified date
+						on = getDateDetail(w, cs, standardDate);
+						
+						String header = cs.getDateDetails().getFullDate().getName();
+						
+						// Add Header Value for Original Date
+						headerValue.add(new HeaderValue(
+								ORIGINAL + header, 
+								on.get(0)));
+						
+						rowData = rowData + ORIGINAL + header + " --- " + on.get(0) + "\n";
+						
+						// Add Header Value of Modifed Date
+						headerValue.add(new HeaderValue(
+								header, 
+								on.get(1)));
+						
+						rowData = rowData + header + " --- " + on.get(1) + "\n";
+	
+						List<HeaderValue> basicList = loadBasicDetails(cs.getBasicDetails(), w);
+						headerValue.addAll(basicList);
+						rowData = rowData + "====================";
+						logger.debug(rowData);
+					}
 					
-					// Add Header Value for Original Date
-					headerValue.add(new HeaderValue(
-							ORIGINAL + header, 
-							on.get(0)));
-					
-					rowData = rowData + ORIGINAL + header + " --- " + on.get(0) + "\n";
-					
-					// Add Header Value of Modifed Date
-					headerValue.add(new HeaderValue(
-							header, 
-							on.get(1)));
-					
-					rowData = rowData + header + " --- " + on.get(1) + "\n";
-
-					List<HeaderValue> basicList = loadBasicDetails(cs.getBasicDetails(), w);
-					headerValue.addAll(basicList);
-					rowData = rowData + "====================";
-					logger.debug(rowData);
-				}
-				
-				
-			} catch (Exception e) {
-				if(on.size()>0) {
-					if(w.isDisplayed()) {
-						logger.error("Failed to Process Data Row: " + wl.indexOf(w)
-								+ " Date: " + on.get(0)
-								+ " Company: " + w.getText());
+				} catch (Exception e) {
+					if(on.size()>0) {
+						if(w.isDisplayed()) {
+							logger.error("Failed to Process Data Row: " + wl.indexOf(w)
+									+ " Date: " + on.get(0)
+									+ " Company: " + w.getText());
+						} else {
+							logger.error("Failed to Process Data Row: " + wl.indexOf(w)
+									+ " Date: " + on.get(0));
+						}
 					} else {
-						logger.error("Failed to Process Data Row: " + wl.indexOf(w)
-								+ " Date: " + on.get(0));
+						logger.error("Failed to Process Data Row: " + wl.indexOf(w));
 					}
-				} else {
-					logger.error("Failed to Process Data Row: " + wl.indexOf(w));
 				}
-			}
-			
-			boolean status = checkData(headerValue);
-			if(status) {
-				headerValueList.add(headerValue);
-			} else {
-				logger.error("Failed to Add Data: " + headerValue.toString());
-			}
-		});
-		
-		logger.info("Unprocessed Data: " + headerValueList.size());
+				
+				boolean status = checkData(headerValue);
+				if(status) {
+					headerValueList.add(headerValue);
+				} else {
+					logger.error("Failed to Add Data: " + headerValue.toString());
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Load Data Error: " + e);
+		}
+		logger.debug("Unprocessed Data: " + headerValueList.size());
 	}
 	
 	private void modifyPerLoad(ElementData ed) {

@@ -2,7 +2,6 @@ package com.euroland.earningcalendar;
 
 import java.util.List;
 
-import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.db.DbService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.matcher.DateMatcherService;
 import com.euroland.earningcalendar.util.matcher.EventMatcherService;
 import com.euroland.earningcalendar.util.thread.ThreadHandler;
@@ -45,11 +45,12 @@ public class EarningCalendarApplication implements CommandLineRunner {
 	
 	@Autowired
 	DbService dbService;
-	
+
+	@Autowired
+	LoggerHandler logger;
+
 	private static final String DEFAULT_CONFIG_FILE = ".\\src\\main\\resources\\companies\\page_conf.json";
-	
-	private static final Logger logger = LoggerFactory.getLogger(EarningCalendarApplication.class);
-	
+
 	public static void main(String[] args) {
 		
 		SpringApplication.run(EarningCalendarApplication.class, args);

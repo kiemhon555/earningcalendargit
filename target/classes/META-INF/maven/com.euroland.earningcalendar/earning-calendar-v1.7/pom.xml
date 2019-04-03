@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.euroland.earningcalendar</groupId>
-	<artifactId>earning-calendar-v1.6</artifactId>
+	<artifactId>earning-calendar-v1.7</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>earning-calendar-v1.6</name>
+	<name>earning-calendar-v1.7</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

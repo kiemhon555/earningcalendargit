@@ -2,8 +2,6 @@ package com.euroland.earningcalendar.util.thread;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.euroland.earningcalendar.model.source.ElementBtn;
 import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 
 @Component
 public class ThreadHandler {
@@ -21,7 +20,8 @@ public class ThreadHandler {
 	@Autowired
 	SeleniumService seleniumService;
 	
-	private static final Logger logger = LoggerFactory.getLogger(ThreadHandler.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	@Async
 	public void checkPopup(WebDriver driver, ElementBtn btn) {
@@ -50,7 +50,7 @@ public class ThreadHandler {
 		try {
 			Thread.sleep(s);
 		} catch (InterruptedException e) {
-			logger.error("Failed to sleep: " + s + " ms");
+			e.printStackTrace();
 		}
 	}
 	

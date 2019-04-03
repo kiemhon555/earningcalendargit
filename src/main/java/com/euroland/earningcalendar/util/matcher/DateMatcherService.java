@@ -50,10 +50,6 @@ public class DateMatcherService {
 		DateTimeFormatter formatter = null;
 		
 		String d = date.replaceAll(REGEX_DELIMITER, DELIMITER).toLowerCase();
-
-//		if (!d.contains(DELIMITER)) {
-//			return modifiedDate;
-//		}
 		
 		if(pattern.equals(""))
 			pattern = DEFAULT_PATTERN;

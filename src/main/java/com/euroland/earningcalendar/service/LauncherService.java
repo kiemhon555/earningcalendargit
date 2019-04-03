@@ -5,8 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +18,7 @@ import com.euroland.earningcalendar.selenium.SeleniumHandler;
 import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.db.DbService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
 @Service
@@ -40,7 +39,8 @@ public class LauncherService {
 	@Autowired
 	private Producer producer;
 
-	private static final Logger logger = LoggerFactory.getLogger(LauncherService.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	public boolean appRunner(SourceConfig c) {
 		
@@ -48,6 +48,8 @@ public class LauncherService {
 		
 		WebDriver driver = null;
 		try {
+
+			logger.setCname(c.getCname());
 			logger.info("Initialize Chrome Driver");
 			driver = seleniumService.getDriver("");
 
@@ -56,7 +58,6 @@ public class LauncherService {
 			
 			status = pageLoader(driver, c.getConfigText());
 			if(status) {
-				logger.info("Processing Results");
 				status = processResult(driver, c.getSourceId());
 			}
 			
@@ -103,7 +104,7 @@ public class LauncherService {
 		}
 
 		if(dataCrawlerService.getCrawledData().size() != 0) {
-			logger.info("Processing Result ...");
+			logger.info("Processing Result: " + dataCrawlerService.getCrawledData().size());
 			status = true;
 		} else {
 			logger.info("No New Data Gathered");
@@ -116,7 +117,7 @@ public class LauncherService {
 	protected void pageNavigation(WebDriver driver, PageConfig config) {}
 	
 	protected void loadData(WebDriver driver, PageConfig config) {
-		logger.info("Load Data ...");
+		logger.debug("Load Data ...");
 		dataCrawlerService.dataLoader(driver, config);
 	}
 	
@@ -136,7 +137,7 @@ public class LauncherService {
 				logger.info("Sent to Rabbit: " + data.size() + " Data");
 			}
 		} else {
-			logger.info("No Data Sent: " + sourceId);
+			logger.info("No Data Sent");
 		}
 		
 		return status;

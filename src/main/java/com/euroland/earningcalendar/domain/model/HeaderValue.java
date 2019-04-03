@@ -26,4 +26,9 @@ public class HeaderValue {
 	public HeaderValue() {
 		super();
 	}
+	
+	@Override
+	public String toString() { 
+        return "[Header: " + this.header + ", Value: " + this.value + "]";
+     }
 }

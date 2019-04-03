@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.util.configuration.ConfService;
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
+import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
 public class Producer {
@@ -20,24 +22,34 @@ public class Producer {
 	@Autowired
 	private ConfService confService;
 
+	@Autowired
+	private LoggerHandler logger;
+
 	public boolean produce(CrawlingResult crawlingResult) {
 		
 		MessagePostProcessor mpp = new MessagePostProcessor() {
 			@Override
-			public org.springframework.amqp.core.Message postProcessMessage(
+			public org.springframework.amqp.core.Message postProcessMessage (
 					org.springframework.amqp.core.Message message) throws AmqpException {
 				message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
 				return message;
 			}
 		};
 
-		try {
-			rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
-		} catch (Exception e) {
-			return false;
+		boolean status = false;
+		int ctr = 1;
+		while(!status && ctr < 4) {
+			try {
+				rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
+				status = true;
+			} catch (Exception e) {
+				logger.error("Sending to Message Failed (Retry: " + ctr + ")");
+				ThreadHandler.sleep(10000);
+				ctr++;
+			}
 		}
 		
-		return true;
+		return status;
 	}
 
 	public Message postProcessMessage(Message message) throws AmqpException {

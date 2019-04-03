@@ -14,10 +14,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.euroland.earningcalendar.util.logger.LoggerHandler;
+import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
 public class SeleniumService {
@@ -25,7 +27,8 @@ public class SeleniumService {
 	@Value(value = "${chrome.driver.location}")
 	private String CHROME_DRIVER_LOCATION;
 
-	private static final Logger logger = LoggerFactory.getLogger(SeleniumService.class);
+	@Autowired
+	LoggerHandler logger;
 	
 	public int verifyURLStatus(String URL) {
 		int statuscode = 200;
@@ -63,7 +66,7 @@ public class SeleniumService {
 		driver.manage().window().maximize();
 		driver.manage().window().setSize(new Dimension(1920, 1080));
 		driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
-		Thread.sleep(1000); // Just wait in case
+		ThreadHandler.sleep(1000); // Just wait in case
 
 		return driver;
 	}
