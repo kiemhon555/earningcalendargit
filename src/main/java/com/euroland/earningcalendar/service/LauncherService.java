@@ -42,6 +42,10 @@ public class LauncherService {
 	@Autowired
 	LoggerHandler logger;
 	
+	private static final String INSERT_METHOD = "insert";
+
+	private static final String REMOVE_METHOD = "remove";
+	
 	public boolean appRunner(SourceConfig c) {
 		
 		boolean status = false;
@@ -53,6 +57,8 @@ public class LauncherService {
 			logger.info("Initialize Chrome Driver");
 			driver = seleniumService.getDriver("");
 
+			dbService.setStandardDate(c.getConfigText().getStandardDate());
+			
 			// initialize crawled data list
 			dataCrawlerService.setCrawledData(null);
 			
@@ -145,7 +151,18 @@ public class LauncherService {
 	
 	private boolean prepareSendingResult(int sourceId,List<List<HeaderValue>> headerValue) {
 		
-		boolean status = producer.produce(new CrawlingResult(sourceId, headerValue));
+		boolean status = producer.produce(new CrawlingResult(sourceId, headerValue, INSERT_METHOD));
+		if(!status)
+			logger.error("Failed to Send New Data");
+		
+		// for updating data on db
+		if (dbService.getDbDataUpdate().size() != 0) {
+			status = producer.produce(new CrawlingResult(sourceId, dbService.getDbDataUpdate(), REMOVE_METHOD));
+			if(!status)
+				logger.error("Failed to Send Update for DB Data");
+			else
+				logger.info("Sent DB Data Update: " + dbService.getDbDataUpdate().size());
+		}
 		
 		return status;
 	}

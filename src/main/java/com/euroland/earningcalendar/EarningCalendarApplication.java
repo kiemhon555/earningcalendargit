@@ -2,8 +2,6 @@ package com.euroland.earningcalendar;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -12,8 +10,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-import com.euroland.earningcalendar.model.date.DateConfig;
-import com.euroland.earningcalendar.model.event.EventConfig;
 import com.euroland.earningcalendar.model.source.PageConfig;
 import com.euroland.earningcalendar.model.source.SourceConfig;
 import com.euroland.earningcalendar.selenium.SeleniumService;
@@ -88,9 +84,8 @@ public class EarningCalendarApplication implements CommandLineRunner {
 				wl.stream().forEach( w -> {
 					// Loading of each source
 					// This condition is for demo purposes
-//					if(w.getSourceId() == 28)
+					if(w.getSourceId() == 32)
 						crawlBeanFactory.getCrawl(w);
-					
 				});
 			}
 			
