@@ -84,7 +84,7 @@ public class EarningCalendarApplication implements CommandLineRunner {
 				wl.stream().forEach( w -> {
 					// Loading of each source
 					// This condition is for demo purposes
-					if(w.getSourceId() == 32)
+					//if(w.getSourceId() == 32)
 						crawlBeanFactory.getCrawl(w);
 				});
 			}
