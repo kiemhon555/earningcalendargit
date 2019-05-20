@@ -33,6 +33,11 @@ public class ConfService {
 	public String RABBIT_EXCHANGE;
 	@Value("${crawler.rabbit.routingkey}")
 	public String RABBIT_ROUTING_KEY;
+	@Value("${crawler.rabbit.remove.exchange}")
+	public String RABBIT_REMOVE_EXCHANGE;
+	@Value("${crawler.rabbit.remove.routingkey}")
+	public String RABBIT_REMOVE_ROUTING_KEY;
+
 
 	@Autowired
 	public RestTemplate restTemplate;

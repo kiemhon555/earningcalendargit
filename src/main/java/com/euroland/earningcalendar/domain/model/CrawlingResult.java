@@ -6,7 +6,6 @@ public class CrawlingResult {
 
 	private int sourceId;
 	private List<List<HeaderValue>> results;
-	private String method;
 	
 	public int getSourceId() {
 		return sourceId;
@@ -23,24 +22,15 @@ public class CrawlingResult {
 	public void setResults(List<List<HeaderValue>> results) {
 		this.results = results;
 	}
-
-	public String getMethod() {
-		return method;
-	}
-
-	public void setMethod(String method) {
-		this.method = method;
-	}
 	
 	public CrawlingResult() {
 		super();
 	}
 
-	public CrawlingResult(int sourceId, List<List<HeaderValue>> results, String method) {
+	public CrawlingResult(int sourceId, List<List<HeaderValue>> results) {
 		super();
 		this.sourceId = sourceId;
 		this.results = results;
-		this.method = method;
 	}
 	
 }

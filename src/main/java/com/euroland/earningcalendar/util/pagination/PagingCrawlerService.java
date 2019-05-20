@@ -79,6 +79,12 @@ public class PagingCrawlerService extends LauncherService{
 		String button = btn.getName();
 		logger.debug("Initialize Navigation: " + button);
 		
+		if(button.equals("Back")) {
+			loadData(driver, config);
+			driver.navigate().back();
+			return;
+		}
+		
 		// Will Check if the clicks of the button is dynamic or constant
 		// value 0 if dynamic
 		// value != if constant
@@ -91,27 +97,24 @@ public class PagingCrawlerService extends LauncherService{
 		// note that the for loop is looping constantly wether what happen to the button click
 		// while the while loop will loop until the button fail to click
 			
-			if ( no != 0) { // constant click
+		if ( no != 0) { // constant click
 				
-				boolean clickOnLoad = btn.isClickOnLoad();
+			boolean clickOnLoad = btn.isClickOnLoad();
 				
-				// will get the index on config to now if the button incrementation is where to start
-				// also will get the incrementation on config to modify the incrementation needed
-				for (int ctr = btn.getIndex(); 
-						ctr < no; ctr = ctr + incrementation) {
+			// will get the index on config to now if the button incrementation is where to start
+			// also will get the incrementation on config to modify the incrementation needed
+			for (int ctr = btn.getIndex(); 
+					ctr < no; ctr = ctr + incrementation) {
 
-					
-					
-					String st = btn.getSelector(); // get the selector on config
-					
+				String st = btn.getSelector(); // get the selector on config
 
-					// This will check if the button is need to be clicked on load or not
-					if (clickOnLoad) {
+				// This will check if the button is need to be clicked on load or not
+				if (clickOnLoad) {
 						
-						if(btn.getName().toLowerCase().equals(NAV_URL_IDENTIFIER)) {
-							String d = "";
-							Pattern p = Pattern.compile(btn.getSelectorType());
-							Matcher m = p.matcher(driver.getCurrentUrl());
+					if(btn.getName().toLowerCase().equals(NAV_URL_IDENTIFIER)) {
+						String d = "";
+						Pattern p = Pattern.compile(btn.getSelectorType());
+						Matcher m = p.matcher(driver.getCurrentUrl());
 	
 						if(m.find()) {
 						    d = m.group(1);

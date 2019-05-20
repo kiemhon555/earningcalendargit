@@ -3,6 +3,7 @@ package com.euroland.earningcalendar.util.data;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -83,6 +84,8 @@ public class DataCrawlerService {
 	
 	private void loadData(CrawlingSection cs, String standardDate) {
 		
+		logger.info("Crawling Data ...");
+		
 		ThreadHandler.sleep(3000);
 		
 		try {
@@ -162,7 +165,7 @@ public class DataCrawlerService {
 		} catch (Exception e) {
 			logger.error("Load Data Error: " + e);
 		}
-		logger.debug("Unprocessed Data: " + headerValueList.size());
+		logger.info("Current Total Crawl Data: " + headerValueList.size());
 	}
 	
 	private void modifyPerLoad(ElementData ed) {
@@ -416,8 +419,23 @@ public class DataCrawlerService {
 					String split = "";
 					String def = "";
 					if(splitter.contains(DEFAULT_IDENTIFIER)) {
-						split = splitter.split(DEFAULT_IDENTIFIER)[1].split(REGEX_IDENTIFIER)[1];
-						def = splitter.split(DEFAULT_IDENTIFIER)[1].split(REGEX_IDENTIFIER)[0];
+						
+						List<String> regs = Arrays.asList(splitter.split(REGEX_IDENTIFIER));
+						
+						if (regs.size() > 2) {
+							def = regs.get(1).substring(0, regs.get(1).length() - 1);
+							Pattern pd = Pattern.compile(def);
+							Matcher md = pd.matcher(text);
+							if(md.find()) {
+								def = md.group(1);
+							}
+							split = regs.get(2);
+						} else {
+							def = regs.get(0).split(DEFAULT_IDENTIFIER)[1];
+							def = def.substring(0, def.length() - 1);
+							split = regs.get(1);
+						}
+						
 					} else {
 						split = splitter.split(REGEX_IDENTIFIER)[1];
 					}

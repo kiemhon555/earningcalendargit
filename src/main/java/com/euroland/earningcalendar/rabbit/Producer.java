@@ -25,7 +25,7 @@ public class Producer {
 	@Autowired
 	private LoggerHandler logger;
 
-	public boolean produce(CrawlingResult crawlingResult) {
+	public boolean produce(CrawlingResult crawlingResult, String method) {
 		
 		MessagePostProcessor mpp = new MessagePostProcessor() {
 			@Override
@@ -40,7 +40,11 @@ public class Producer {
 		int ctr = 1;
 		while(!status && ctr < 4) {
 			try {
-				rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
+				if(method.equals("insert")) {
+					rabbitTemplate.convertAndSend(confService.RABBIT_EXCHANGE, confService.RABBIT_ROUTING_KEY, crawlingResult, mpp);
+				} else {
+					rabbitTemplate.convertAndSend(confService.RABBIT_REMOVE_EXCHANGE, confService.RABBIT_REMOVE_ROUTING_KEY, crawlingResult, mpp);
+				}
 				status = true;
 			} catch (Exception e) {
 				logger.error("Sending to Message Failed (Retry: " + ctr + ")");

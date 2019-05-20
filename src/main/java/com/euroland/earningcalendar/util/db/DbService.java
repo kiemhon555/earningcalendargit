@@ -3,10 +3,8 @@ package com.euroland.earningcalendar.util.db;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,8 +13,6 @@ import com.euroland.earningcalendar.domain.model.CrawlingResult;
 import com.euroland.earningcalendar.domain.model.HeaderValue;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.logger.LoggerHandler;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 @Service
 public class DbService {
@@ -43,7 +39,7 @@ public class DbService {
 		} else {
 			result = getDistinctNewData(headerValue);
 		}
-		
+
 		return result;
 
 	}
@@ -62,34 +58,14 @@ public class DbService {
 		
 		List<List<HeaderValue>> ret = new ArrayList<>();
 
-		Iterator<List<HeaderValue>> nds = newData.iterator();
-		while (nds.hasNext()) {
-			List<HeaderValue> nhv = nds.next();
+		newData.stream().forEach(nd -> {
+			boolean exist = dbData.removeIf(dd -> dd.stream().allMatch(hv -> 
+					recordExist(nd, hv.getHeader(), hv.getValue())));
 			
-			boolean addToDb = true;
-			Iterator<List<HeaderValue>> its = dbData.iterator();
-			while (its.hasNext()) {
-				boolean testCheck = true;
-				
-				Iterator<HeaderValue> it = its.next().iterator();
-				while (it.hasNext()) {
-					HeaderValue hv = it.next();
-					if (testCheck)
-						testCheck = recordExist(nhv, hv.getHeader(), hv.getValue());
-				}
-
-				if (testCheck) {
-					addToDb = false;
-					
-					// Remove Existing on Arrays
-					its.remove();
-					nds.remove();
-				}
-			}
-
-			if (addToDb)
-				ret.add(nhv);
-		}
+			// if data not exist on database
+			if (!exist)
+				ret.add(nd);
+		});
 		
 		dbDataUpdate = toBeRemovedDbData(dbData);
 
@@ -98,25 +74,20 @@ public class DbService {
 
 	private List<List<HeaderValue>> toBeRemovedDbData(List<List<HeaderValue>> dbData) {
 		
-		// prepare db data to be removed
-		Iterator<List<HeaderValue>> lhv = dbData.iterator();
-		
-		while (lhv.hasNext()) {
-			
-			HeaderValue date = lhv.next().stream()
-					.filter(e -> e.getHeader().equals("Date")).findAny().orElse(null);
+		List<List<HeaderValue>> ret = new ArrayList<>();
+		dbData.stream().forEach(dd -> {
+			HeaderValue date = dd.stream().filter(e -> e.getHeader().equals("Date")).findAny().orElse(null);
 			if(date != null) {
 				if(!date.getValue().equals("")) {
 					LocalDate ld = LocalDate.parse(date.getValue(), DateTimeFormatter.ofPattern(standardDate));
-					if (ld.isBefore(LocalDate.now())) {
-						// Remove Data that is on the past
-						lhv.remove();
-					}
+					// add data if not before todays date
+					if (!ld.isBefore(LocalDate.now()))
+						ret.add(dd);
 				}
 			}
-		}
+		});
 		
-		return dbData;
+		return ret;
 	}
 	
 	private boolean recordExist(List<HeaderValue> rlst, String header, String value) {
@@ -140,15 +111,13 @@ public class DbService {
 	
 	private List<List<HeaderValue>> getDistinctNewData(List<List<HeaderValue>> llhv) {
 		List<List<HeaderValue>> result = new ArrayList<>();
-	
-		List<String> ls= new ArrayList<>();
+		List<String> temp = new ArrayList<String>();
 		
-		llhv.stream().forEach( lhv -> {
-			ls.add(new Gson().toJson(lhv));
-		});
-		
-		ls.stream().distinct().collect(Collectors.toList()).forEach( s -> {
-			result.add(new Gson().fromJson(s, new TypeToken<List<HeaderValue>>() {}.getType()));
+		llhv.stream().forEach(l -> {
+			if (!temp.contains(l.toString())) {
+				temp.add(l.toString());
+				result.add(l);
+			}
 		});
 		
 		logger.info("Distinct Data: " + result.size());
