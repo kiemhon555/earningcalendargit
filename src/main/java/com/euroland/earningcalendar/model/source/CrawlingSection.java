@@ -2,8 +2,6 @@ package com.euroland.earningcalendar.model.source;
 
 import java.util.List;
 
-import com.euroland.earningcalendar.model.date.DateDetails;
-
 public class CrawlingSection {
 
 	private ElementData modifyElement;

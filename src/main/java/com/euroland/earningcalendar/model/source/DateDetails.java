@@ -1,8 +1,6 @@
-package com.euroland.earningcalendar.model.date;
+package com.euroland.earningcalendar.model.source;
 
 import java.util.List;
-
-import com.euroland.earningcalendar.model.source.ElementData;
 
 public class DateDetails {
 	

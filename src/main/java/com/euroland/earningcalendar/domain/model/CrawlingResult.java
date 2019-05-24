@@ -4,14 +4,14 @@ import java.util.List;
 
 public class CrawlingResult {
 
-	private int sourceId;
+	private Long sourceId;
 	private List<List<HeaderValue>> results;
 	
-	public int getSourceId() {
+	public Long getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(int sourceId) {
+	public void setSourceId(Long sourceId) {
 		this.sourceId = sourceId;
 	}
 
@@ -27,7 +27,7 @@ public class CrawlingResult {
 		super();
 	}
 
-	public CrawlingResult(int sourceId, List<List<HeaderValue>> results) {
+	public CrawlingResult(Long sourceId, List<List<HeaderValue>> results) {
 		super();
 		this.sourceId = sourceId;
 		this.results = results;

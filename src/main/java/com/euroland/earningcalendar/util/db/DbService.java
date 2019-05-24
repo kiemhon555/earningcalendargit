@@ -27,7 +27,7 @@ public class DbService {
 	
 	private List<List<HeaderValue>> dbDataUpdate = new ArrayList<>();
 	
-	public List<List<HeaderValue>> checkDuplicate(int sourceId, List<List<HeaderValue>> headerValue) {
+	public List<List<HeaderValue>> checkDuplicate(Long sourceId, List<List<HeaderValue>> headerValue) {
 		List<List<HeaderValue>> result = null;
 		
 		List<List<HeaderValue>> dbData = getPreviousDataFromDB(sourceId);
@@ -95,12 +95,12 @@ public class DbService {
 		return rlst.stream().anyMatch(p1);
 	}
 	
-	private List<List<HeaderValue>> getPreviousDataFromDB (int sourceId) {
+	private List<List<HeaderValue>> getPreviousDataFromDB (Long sourceId) {
 		List<List<HeaderValue>> ret = null;
 		
 		// getting previous data from db
 		CrawlingResult hvd = (CrawlingResult) confService.prepareTestConf(
-				confService.HOST + confService.PREV_CRAWLED_DATA_LINK + Integer.toString(sourceId), new CrawlingResult());
+				confService.HOST + confService.PREV_CRAWLED_DATA_LINK + Long.toString(sourceId), new CrawlingResult());
 		
 		if (hvd != null) {
 			ret = hvd.getResults();

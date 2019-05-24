@@ -127,7 +127,7 @@ public class LauncherService {
 		dataCrawlerService.dataLoader(driver, config);
 	}
 	
-	private boolean processResult(WebDriver driver, int sourceId) {
+	private boolean processResult(WebDriver driver, Long sourceId) {
 		
 		boolean status = false;
 		
@@ -149,7 +149,7 @@ public class LauncherService {
 		return status;
 	}
 	
-	private boolean prepareSendingResult(int sourceId,List<List<HeaderValue>> headerValue) {
+	private boolean prepareSendingResult(Long sourceId,List<List<HeaderValue>> headerValue) {
 		
 		boolean status = producer.produce(new CrawlingResult(sourceId, headerValue), INSERT_METHOD);
 		if(!status)

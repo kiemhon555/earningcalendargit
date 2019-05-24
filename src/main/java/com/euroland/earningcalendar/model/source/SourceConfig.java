@@ -2,16 +2,16 @@ package com.euroland.earningcalendar.model.source;
 
 public class SourceConfig {
 	
-	private int id;
-	private int sourceId;
+	private Long id;
+	private Long sourceId;
 	private String cname;
 	private PageConfig configText;
 	
-	public int getSourceId() {
+	public Long getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(int sourceId) {
+	public void setSourceId(Long sourceId) {
 		this.sourceId = sourceId;
 	}
 
@@ -31,11 +31,11 @@ public class SourceConfig {
 		this.configText = configText;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -44,7 +44,7 @@ public class SourceConfig {
 
 	}
 
-	public SourceConfig(int id, int sourceId, String cname, PageConfig configText) {
+	public SourceConfig(Long id, Long sourceId, String cname, PageConfig configText) {
 		super();
 		this.id = id;
 		this.sourceId = sourceId;
