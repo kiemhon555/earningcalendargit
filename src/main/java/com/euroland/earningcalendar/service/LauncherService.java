@@ -52,8 +52,6 @@ public class LauncherService {
 		
 		WebDriver driver = null;
 		try {
-
-			logger.setCname(c.getCname());
 			logger.info("Initialize Chrome Driver");
 			driver = seleniumService.getDriver("");
 

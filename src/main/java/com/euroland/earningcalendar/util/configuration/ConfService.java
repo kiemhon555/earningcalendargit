@@ -21,6 +21,8 @@ public class ConfService {
 	
 	@Value("${crawler.host}")
 	public String HOST;
+	@Value("${crawl.source}")
+	public String SOURCE;
 	@Value("${crawler.config.source}")
 	public String CONFIG_LINK;
 	@Value("${crawler.config.date}")

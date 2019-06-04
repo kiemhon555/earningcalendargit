@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -54,8 +55,6 @@ public class DataCrawlerService {
 	
 	private String year;
 	
-	private String rowData;
-	
 	private List<List<HeaderValue>> headerValueList = new ArrayList<>();
 	
 	public void dataLoader(WebDriver driver, PageConfig config) {
@@ -100,8 +99,6 @@ public class DataCrawlerService {
 					webDriver, cs.getBasicDetails().get(0).getSelector(), cs.getBasicDetails().get(0).getSelectorType());
 	
 			wl.stream().forEach( w -> {
-	
-				rowData = "\n====================\n";
 				
 				List<HeaderValue> headerValue = new ArrayList<>();
 				List<String> on = new ArrayList<>();
@@ -125,19 +122,14 @@ public class DataCrawlerService {
 								ORIGINAL + header, 
 								on.get(0)));
 						
-						rowData = rowData + ORIGINAL + header + " --- " + on.get(0) + "\n";
-						
 						// Add Header Value of Modifed Date
 						headerValue.add(new HeaderValue(
 								header, 
 								on.get(1)));
-						
-						rowData = rowData + header + " --- " + on.get(1) + "\n";
 	
 						List<HeaderValue> basicList = loadBasicDetails(cs.getBasicDetails(), w);
 						headerValue.addAll(basicList);
-						rowData = rowData + "====================";
-						logger.debug(rowData);
+						logger.debug(headerValue.stream().map(k -> k.getHeader() + " : " + k.getValue()).collect(Collectors.joining("\\n")));
 					}
 					
 				} catch (Exception e) {
@@ -251,14 +243,12 @@ public class DataCrawlerService {
 				// Add Header Value for Original Event Name
 				header = ORIGINAL + EVENT;
 				headerValue.add(new HeaderValue(header, value));
-				rowData = rowData + header + " --- " + value + "\n";
 				
 				// Add Header Value for Modified Event Name
 				header = EVENT;
 				value = EventMatcherService.getEvent(value);
 			}
 
-			rowData = rowData + header + " --- " + value + "\n";
 			// Add Header Value for Basic Details
 			headerValue.add(new HeaderValue(header, value));
 		});

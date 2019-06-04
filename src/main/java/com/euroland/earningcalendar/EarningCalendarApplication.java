@@ -1,6 +1,8 @@
 package com.euroland.earningcalendar;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -82,17 +84,27 @@ public class EarningCalendarApplication implements CommandLineRunner {
 				
 				logger.info("Sources Successfully Loaded");
 				wl.stream().forEach( w -> {
+					
+					// Set Source Name Per Thread for Logs
+					Thread.currentThread().setName(w.getCname());
+					
 					// Loading of each source
 					// This condition is for demo purposes
-//					if(w.getSourceId() == 14)
+					if(confService.SOURCE.equalsIgnoreCase("all")) {
 						crawlBeanFactory.getCrawl(w);
+					} else {
+						List<String> l = Arrays.asList(confService.SOURCE.split(","));
+						String check = l.stream().filter(p -> p.trim().equals(String.valueOf(w.getSourceId()))).findFirst().orElse("");
+						if(!check.equals(""))
+							crawlBeanFactory.getCrawl(w);
+					}
 				});
 			}
 			
 			// for resources location of page config
 //			PageConfig pc = (PageConfig) confService.prepareTestConf(DEFAULT_CONFIG_FILE, new PageConfig());
 //			
-//			crawlBeanFactory.getCrawl(new SourceConfig(34, 1, "def", pc));
+//			crawlBeanFactory.getCrawl(new SourceConfig(56, 32, "def", pc));
 		}
 	}
 	
