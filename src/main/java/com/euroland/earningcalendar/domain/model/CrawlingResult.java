@@ -5,7 +5,7 @@ import java.util.List;
 public class CrawlingResult {
 
 	private Long sourceId;
-	private List<List<HeaderValue>> results;
+	private List<List<HeaderValue>> jsonData;
 	
 	public Long getSourceId() {
 		return sourceId;
@@ -15,22 +15,22 @@ public class CrawlingResult {
 		this.sourceId = sourceId;
 	}
 
-	public List<List<HeaderValue>> getResults() {
-		return results;
+	public List<List<HeaderValue>> getJsonData() {
+		return jsonData;
 	}
 	
-	public void setResults(List<List<HeaderValue>> results) {
-		this.results = results;
+	public void setJsonData(List<List<HeaderValue>> jsonData) {
+		this.jsonData = jsonData;
 	}
 	
 	public CrawlingResult() {
 		super();
 	}
 
-	public CrawlingResult(Long sourceId, List<List<HeaderValue>> results) {
+	public CrawlingResult(Long sourceId, List<List<HeaderValue>> jsonData) {
 		super();
 		this.sourceId = sourceId;
-		this.results = results;
+		this.jsonData = jsonData;
 	}
 	
 }

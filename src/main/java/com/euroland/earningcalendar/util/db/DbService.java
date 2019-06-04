@@ -103,7 +103,7 @@ public class DbService {
 				confService.HOST + confService.PREV_CRAWLED_DATA_LINK + Long.toString(sourceId), new CrawlingResult());
 		
 		if (hvd != null) {
-			ret = hvd.getResults();
+			ret = hvd.getJsonData();
 		}
 		
 		return ret;
