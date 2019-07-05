@@ -27,7 +27,7 @@ public class PagingCrawlerService extends LauncherService{
 	private static final String FULL_CLICK_IDENTIFIER = "click all";
 
 	// To identify if the button is a drop down type
-	private static final String DROPDOWN_IDENTIFIER = "dropdown";
+	private static final String DROPDOWN_IDENTIFIER = "Dropdown";
 	
 	// To identify if the button is on a dialog
 	private static final String DIALOG_IDENTIFIER = "dialog";
@@ -141,8 +141,8 @@ public class PagingCrawlerService extends LauncherService{
 							if(!checkNullOrDisable(we) && !btn.getName().toLowerCase().contains(DIALOG_IDENTIFIER))
 								continue;
 		
-							if(button.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
-								seleniumHandler.webElementClick(driver, we.findElement(By.xpath(button.split(" ")[1])), 3000);
+							if(button.contains(DROPDOWN_IDENTIFIER)) {
+								seleniumHandler.webElementClick(driver, we.findElement(By.xpath(button.split(DROPDOWN_IDENTIFIER)[1])), 3000);
 							}
 							
 							boolean status = seleniumHandler.webElementClick(driver, we, 3000);
@@ -195,8 +195,8 @@ public class PagingCrawlerService extends LauncherService{
 					if(!checkNullOrDisable(we))
 						status = false;
 					
-					if(button.toLowerCase().contains(DROPDOWN_IDENTIFIER)) {
-						WebElement dd = seleniumService.webElementOut(driver, button.split(" ")[1], btn.getSelectorType());
+					if(button.contains(DROPDOWN_IDENTIFIER)) {
+						WebElement dd = seleniumService.webElementOut(driver, button.split(DROPDOWN_IDENTIFIER)[1], btn.getSelectorType());
 						if(dd != null)
 							seleniumHandler.webElementClick(driver, dd, 3000);
 					}

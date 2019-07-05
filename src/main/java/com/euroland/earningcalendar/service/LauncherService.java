@@ -19,6 +19,7 @@ import com.euroland.earningcalendar.selenium.SeleniumService;
 import com.euroland.earningcalendar.util.data.DataCrawlerService;
 import com.euroland.earningcalendar.util.db.DbService;
 import com.euroland.earningcalendar.util.logger.LoggerHandler;
+import com.euroland.earningcalendar.util.mailer.MailHandler;
 import com.euroland.earningcalendar.util.pagination.PagingCrawlerService;
 
 @Service
@@ -41,6 +42,9 @@ public class LauncherService {
 
 	@Autowired
 	LoggerHandler logger;
+	
+	@Autowired
+	MailHandler mailHandler;
 	
 	private static final String INSERT_METHOD = "insert";
 
@@ -111,7 +115,9 @@ public class LauncherService {
 			logger.info("Processing Result: " + dataCrawlerService.getCrawledData().size());
 			status = true;
 		} else {
-			logger.info("No New Data Gathered");
+			logger.error("No Data Found");
+//			producer.produce(Thread.currentThread().getName(), "No Data Found");
+			mailHandler.sendMail("Source: " + Thread.currentThread().getName() + "<br>Message: No Data Found");
 			status = false;
 		}
 		
@@ -141,7 +147,7 @@ public class LauncherService {
 				logger.info("Sent to Rabbit: " + data.size() + " Data");
 			}
 		} else {
-			logger.info("No Data Sent");
+			logger.error("No New Data Gathered");
 		}
 		
 		return status;

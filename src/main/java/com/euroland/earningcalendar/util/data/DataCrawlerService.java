@@ -204,8 +204,26 @@ public class DataCrawlerService {
 				status = true;
 			}
 			
-		} else {
-			status = false;
+		}
+		
+		if(status) {
+			HeaderValue name = headerValue.stream()
+						.filter(e -> "Company Name".equals(e.getHeader())).findAny().orElse(null);
+			if(name!=null && !name.getValue().equals("")) {
+				status = true;
+			} else {
+				HeaderValue symbol = headerValue.stream()
+						.filter(e -> "Symbol".equals(e.getHeader())).findAny().orElse(null);
+				if(symbol!=null && !symbol.getValue().equals("")) {
+					status = true;
+				} else {
+					HeaderValue isin = headerValue.stream()
+							.filter(e -> "ISIN".equals(e.getHeader())).findAny().orElse(null);
+					if(isin!=null && !isin.getValue().equals("")) {
+						status = true;
+					}
+				}
+			}
 		}
 		
 		return status;
@@ -397,9 +415,11 @@ public class DataCrawlerService {
 	}
 	
 	public String isSplit(String text, String splitter, int pos) {
-		String result = "";
+		String result = text;
 
-		result = text.replaceAll("\n", " ");
+		if(splitter == null || (splitter != null && !splitter.contains("\n"))) {
+			result = text.replaceAll("\n", " ");
+		}
 		
 		if(splitter != null) {
 			try {

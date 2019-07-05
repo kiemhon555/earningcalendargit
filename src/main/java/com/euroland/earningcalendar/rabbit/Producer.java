@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.euroland.earningcalendar.domain.model.CrawlingResult;
+import com.euroland.earningcalendar.model.mail.MailObject;
 import com.euroland.earningcalendar.util.configuration.ConfService;
 import com.euroland.earningcalendar.util.logger.LoggerHandler;
+import com.euroland.earningcalendar.util.mailer.MailHandler;
 import com.euroland.earningcalendar.util.thread.ThreadHandler;
 
 @Service
@@ -24,6 +26,9 @@ public class Producer {
 
 	@Autowired
 	private LoggerHandler logger;
+	
+	@Autowired
+	private MailHandler mailHandler;
 
 	public boolean produce(CrawlingResult crawlingResult, String method) {
 		
@@ -51,6 +56,10 @@ public class Producer {
 				ThreadHandler.sleep(10000);
 				ctr++;
 			}
+		}
+		
+		if(!status) {
+			mailHandler.sendMail("Source: " + Thread.currentThread().getName() + "<br>Message: Failed to Send to Rabbit");
 		}
 		
 		return status;

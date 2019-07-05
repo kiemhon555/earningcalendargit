@@ -39,6 +39,12 @@ public class ConfService {
 	public String RABBIT_REMOVE_EXCHANGE;
 	@Value("${crawler.rabbit.remove.routingkey}")
 	public String RABBIT_REMOVE_ROUTING_KEY;
+	@Value("${mailer.host}")
+	public String MAILER_HOST;
+	@Value("${mailer.to}")
+	public String MAILER_TO;
+	@Value("${mailer.cc}")
+	public String MAILER_CC;
 
 
 	@Autowired
